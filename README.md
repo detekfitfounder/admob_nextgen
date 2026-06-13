@@ -1,15 +1,33 @@
 # admob_nextgen
 
-Flutter plugin for the Android Google Mobile Ads Next-Gen SDK.
+<p>
+  <a href="https://pub.dev/packages/admob_nextgen">
+    <img src="https://img.shields.io/pub/v/admob_nextgen.svg" alt="pub version">
+  </a>
+  <a href="https://pub.dev/packages/admob_nextgen/score">
+    <img src="https://img.shields.io/pub/points/admob_nextgen" alt="pub points">
+  </a>
+  <a href="https://pub.dev/packages/admob_nextgen/score">
+    <img src="https://img.shields.io/pub/likes/admob_nextgen" alt="pub likes">
+  </a>
+  <a href="https://pub.dev/packages/admob_nextgen">
+    <img src="https://img.shields.io/pub/dm/admob_nextgen" alt="pub downloads">
+  </a>
+  <a href="https://github.com/Aban3049/admob_nextgen/blob/main/LICENSE">
+    <img src="https://img.shields.io/github/license/Aban3049/admob_nextgen" alt="license">
+  </a>
+</p>
 
-`admob_nextgen` provides Android-only wrappers for initialization, UMP consent,
-banner ads, interstitial ads, rewarded ads, rewarded interstitial ads, app open
-ads, preloaders, and customizable native ad templates.
+Flutter wrappers for the Android Google Mobile Ads Next-Gen SDK.
 
-Platform note: this package targets Android only. iOS is not implemented yet.
+`admob_nextgen` provides a Dart-first API for Google Mobile Ads Next-Gen
+initialization, UMP consent, banners, interstitial ads, rewarded ads, rewarded
+interstitial ads, app open ads, preloaders, request targeting, and customizable
+native ad templates.
 
-This is an unofficial Flutter plugin. It is not published, endorsed, or
-maintained by Google.
+> Android only. iOS is not implemented yet.
+
+> Unofficial package. Not published, endorsed, or maintained by Google.
 
 ## Preview
 
@@ -17,40 +35,18 @@ maintained by Google.
 | --- | --- |
 | ![admob_nextgen banner example](https://raw.githubusercontent.com/Aban3049/admob_nextgen/main/screenshots/banner.webp) | ![admob_nextgen native ad templates](https://raw.githubusercontent.com/Aban3049/admob_nextgen/main/screenshots/native.webp) |
 
-
-## Known SDK issue
-
-Google's GMA Next-Gen SDK release notes say version `1.1.1` fixes an issue
-where rewarded ad pods could freeze during transitions and prevent users from
-closing the ad:
-
-https://developers.google.com/admob/android/next-gen/rel-notes
-
-There is also a public AdMob Community thread with a reported Next-Gen SDK
-`NullPointerException` crash and stack trace:
-
-https://support.google.com/admob/thread/438640611/admob-next-gen-1-1-0-fatal-exception-java-lang-nullpointerexception?hl=en
-
-Until that native SDK crash situation is clear, this package is not bumping the
-bundled `ads-mobile-sdk` dependency to `1.1.1`.
-
-## Features
+## Highlights
 
 - Google Mobile Ads Next-Gen SDK initialization.
-- UMP consent flow helpers.
+- UMP consent helpers.
 - Banner ads with anchored, large anchored, and inline adaptive sizes.
 - Interstitial, rewarded, rewarded interstitial, and app open ads.
 - Interstitial and rewarded interstitial preloaders.
-- Standard native ads with three prebuilt Android templates:
-  - `NativeBannerAdView`
-  - `NativeSmallAdView`
-  - `NativeLargeAdView`
-- Native ad styling for card color, CTA button, title, description, and ad badge.
-
+- Three prebuilt native ad templates.
+- Custom native ad styling.
+- Future-first ad loading with instance listeners.
 
 ## Installation
-
-Add the package to `pubspec.yaml`:
 
 ```yaml
 dependencies:
@@ -63,10 +59,10 @@ Then run:
 flutter pub get
 ```
 
-## Android setup
+## Android Setup
 
-Add your AdMob app ID to `android/app/src/main/AndroidManifest.xml` inside the
-`<application>` tag:
+Add your AdMob app ID inside the `<application>` tag in
+`android/app/src/main/AndroidManifest.xml`:
 
 ```xml
 <meta-data
@@ -74,29 +70,38 @@ Add your AdMob app ID to `android/app/src/main/AndroidManifest.xml` inside the
     android:value="ca-app-pub-xxxxxxxxxxxxxxxx~yyyyyyyyyy" />
 ```
 
-The example test app ID is:
+Google test app ID:
 
 ```xml
 ca-app-pub-3940256099942544~3347511713
 ```
 
-Use AdMob test ad unit IDs while developing. Do not use live ad units for local
+Use test ad unit IDs while developing. Do not use live ad units for local
 testing.
 
-## Mediation compatibility
+## Important Notes
+
+### Consent Startup Warning
+
+Wrap the startup consent flow in `try/catch`.
+
+If the device is offline and `requestConsentInfoUpdate()` or
+`loadAndShowConsentFormIfRequired()` fails during a splash screen, an uncaught
+exception can prevent `runApp()` from being called and leave the app stuck.
+
+### Mediation Warning
 
 Do not use this package together with Google Mobile Ads mediation adapters such
-as Meta/Facebook Audience Network mediation. The Google Mobile Ads Next-Gen SDK
-is not currently compatible with existing mediation adapters, and adding a
-mediation dependency can produce duplicate Google Play services / GMS class
-errors at build time. Remove the mediation adapter dependency and use direct
-Next-Gen SDK ad units with this package.
+as Meta/Facebook Audience Network mediation.
 
-## Initialize ads and consent
+The Google Mobile Ads Next-Gen SDK is not currently compatible with existing
+mediation adapters. Adding mediation dependencies can cause duplicate Google
+Play services / GMS class errors during Android builds.
 
-Important: unlike the old Google Mobile Ads Flutter SDK flow, this package
-requires the Google Mobile Ads Next-Gen SDK to be initialized before loading or
-showing ads. Call `MobileAds.initialize()` after consent allows ad requests.
+Remove mediation adapter dependencies and use direct Next-Gen SDK ad units with
+this package.
+
+## Initialize Ads and Consent
 
 ```dart
 import 'package:admob_nextgen/admob_nextgen.dart';
@@ -121,19 +126,12 @@ Future<void> main() async {
   } on ConsentFormException catch (error) {
     print('Consent flow failed: ${error.error}');
   } catch (error) {
-    print('Consent flow failed: $error');
+    print('Consent startup failed: $error');
   }
 
   runApp(const MyApp());
 }
 ```
-
-Warning: wrap the splash/startup consent flow in `try/catch`. If the device is
-offline and `requestConsentInfoUpdate()` or
-`loadAndShowConsentFormIfRequired()` fails, an uncaught exception can prevent
-your splash flow from completing and leave the app stuck on the splash screen.
-Catch `ConsentFormException` and any unexpected startup error, log or report
-the failure, and continue to `runApp()` with your app's fallback state.
 
 Optionally configure test devices:
 
@@ -145,7 +143,7 @@ await MobileAds.setRequestConfiguration(
 );
 ```
 
-## Banner ad
+## Banner Ad
 
 ```dart
 BannerAdView(
@@ -155,29 +153,36 @@ BannerAdView(
 )
 ```
 
-Available banner sizes:
+Available sizes:
 
 - `AdSize.anchored()`
 - `AdSize.largeAnchored()`
 - `AdSize.inline()`
 
-## Interstitial ad
+## Interstitial Ad
 
 ```dart
-final ad = await InterstitialAd.load(
-  adUnitId: 'ca-app-pub-3940256099942544/1033173712',
-);
+try {
+  final ad = await InterstitialAd.load(
+    adUnitId: 'ca-app-pub-3940256099942544/1033173712',
+  );
 
-ad.listener = InterstitialAdListener(
-  onAdDismissedFullScreenContent: () {
-    print('Interstitial dismissed');
-  },
-);
+  ad.listener = InterstitialAdListener(
+    onAdDismissedFullScreenContent: () {
+      print('Interstitial dismissed');
+    },
+    onAdFailedToShowFullScreenContent: (error) {
+      print('Interstitial failed to show: $error');
+    },
+  );
 
-await ad.show();
+  await ad.show();
+} on AdLoadException catch (error) {
+  print('Interstitial failed to load: ${error.error}');
+}
 ```
 
-## Rewarded ad
+## Rewarded Ad
 
 ```dart
 final ad = await RewardedAd.load(
@@ -191,7 +196,7 @@ await ad.show(
 );
 ```
 
-## Rewarded interstitial ad
+## Rewarded Interstitial Ad
 
 ```dart
 final ad = await RewardedInterstitialAd.load(
@@ -205,9 +210,7 @@ await ad.show(
 );
 ```
 
-## App open ad
-
-Load an app open ad, then show it when the app returns to the foreground:
+## App Open Ad
 
 ```dart
 AppOpenAd? appOpenAd;
@@ -215,6 +218,7 @@ StreamSubscription<AppState>? appStateSubscription;
 
 Future<void> startAppOpenAds() async {
   await AppStateEventNotifier.startListening();
+
   appStateSubscription = AppStateEventNotifier.appStateStream.listen((state) {
     if (state == AppState.foreground) {
       showAppOpenAdIfAvailable();
@@ -242,13 +246,12 @@ Future<void> stopAppOpenAds() async {
 }
 ```
 
-`AppStateEventNotifier` uses the Android process lifecycle, so opening and
-closing a full-screen ad is not mistaken for leaving and returning to the app.
+`AppStateEventNotifier` uses Android process lifecycle events, so opening and
+closing a full-screen ad is not treated as leaving and returning to the app.
 
-## Native ads
+## Native Ads
 
-Load one `NativeAd`, then render it with one of the three prebuilt templates.
-Native ads should be disposed when the placement is no longer used.
+Load one `NativeAd`, then render it with one of the included templates.
 
 ```dart
 final nativeAd = NativeAd(
@@ -258,9 +261,7 @@ final nativeAd = NativeAd(
 await nativeAd.load();
 ```
 
-### Native banner template
-
-Smallest template with icon, title, and CTA button.
+### Native Banner
 
 ```dart
 NativeBannerAdView(
@@ -268,9 +269,7 @@ NativeBannerAdView(
 )
 ```
 
-### Native small template
-
-Compact template with icon, title, description, and CTA button.
+### Native Small
 
 ```dart
 NativeSmallAdView(
@@ -278,9 +277,7 @@ NativeSmallAdView(
 )
 ```
 
-### Native large template
-
-Large template with icon, title, description, media content, and CTA button.
+### Native Large
 
 ```dart
 NativeLargeAdView(
@@ -289,21 +286,7 @@ NativeLargeAdView(
 )
 ```
 
-If you increase the CTA button height, also increase the native view height:
-
-```dart
-NativeLargeAdView(
-  nativeAd: nativeAd,
-  height: 430,
-  style: const NativeAdViewStyle(
-    callToActionHeight: 70,
-  ),
-)
-```
-
-## Native customization options
-
-All styling options are optional:
+## Native Styling
 
 ```dart
 NativeLargeAdView(
@@ -328,26 +311,7 @@ NativeLargeAdView(
 )
 ```
 
-Supported `NativeAdViewStyle` fields:
-
-- `cardColor`
-- `titleColor`
-- `descriptionColor`
-- `callToActionText`
-- `callToActionColor`
-- `callToActionTextColor`
-- `callToActionHeight`
-- `callToActionCornerRadius`
-- `adBadgeText`
-- `adBadgeTextColor`
-- `adBadgeColor`
-- `adBadgeBorderColor`
-- `adBadgeBorderWidth`
-- `adBadgeCornerRadius`
-
 ## Preloaders
-
-Interstitial and rewarded interstitial ads can be preloaded:
 
 ```dart
 await InterstitialAdPreloader.start(
@@ -362,9 +326,7 @@ final ad = await InterstitialAdPreloader.poll(
 await ad?.show();
 ```
 
-## Request targeting
-
-Pass optional request hints to supported ad loads:
+## Request Targeting
 
 ```dart
 const request = AdRequest(
@@ -381,39 +343,64 @@ final ad = await InterstitialAd.load(
 );
 ```
 
-## Migrating from `google_mobile_ads`
+## Migrating From `google_mobile_ads`
 
-Replace the package import:
+Replace the import:
 
 ```dart
 import 'package:admob_nextgen/admob_nextgen.dart';
 ```
 
-`AppState`, `AppStateEventNotifier.startListening()`, `stopListening()`, and
-`appStateStream` keep the same usage pattern as `google_mobile_ads`.
+App open and interstitial loading is Future-first. Replace load callbacks with
+`await` and `try/catch`.
 
-App open and interstitial loading is Future-first. Replace Google load
-callbacks with `await` and `try/catch`:
+Use `listener` instead of `fullScreenContentCallback`.
 
-```dart
-try {
-  final ad = await InterstitialAd.load(adUnitId: interstitialAdUnitId);
-  ad.listener = InterstitialAdListener(
-    onAdDismissedFullScreenContent: createInterstitialAd,
-    onAdFailedToShowFullScreenContent: (_) => createInterstitialAd(),
-  );
-  await ad.show();
-} on AdLoadException catch (error) {
-  print('Interstitial load failed: ${error.error}');
-}
-```
-
-For app open ads, use the same pattern with `AppOpenAd.load()` and
-`AppOpenAdListener`. Replace `fullScreenContentCallback` with `listener`.
-Dismissed and failed-to-show ads are consumed and released automatically, so
-do not call `dispose()` from terminal full-screen callbacks. Explicitly call
-`dispose()` only when abandoning a loaded ad before showing it.
+Dismissed and failed-to-show full-screen ads are consumed and released
+automatically, so do not call `dispose()` from terminal full-screen callbacks.
+Explicitly call `dispose()` only when abandoning a loaded ad before showing it.
 
 Native ads and banners use this package's template/widget APIs and are not
 drop-in replacements for the old `AdWidget`, custom native factories, or
 `BannerAd` constructor.
+
+## Troubleshooting
+
+### App stuck on splash when internet is off
+
+Wrap the consent startup flow in `try/catch` and always continue to `runApp()`.
+
+### Duplicate Google Play services / GMS classes
+
+Remove mediation adapters from the app. Next-Gen SDK mediation compatibility is
+not currently supported.
+
+### Ads do not load
+
+Check that:
+
+- the Android AdMob app ID is present in `AndroidManifest.xml`;
+- `MobileAds.initialize()` completed before loading ads;
+- consent allows ad requests;
+- test ad unit IDs are used during development;
+- the app has internet access.
+
+## Known Native SDK Issue
+
+Google's GMA Next-Gen SDK release notes say version `1.1.1` fixes an issue
+where rewarded ad pods could freeze during transitions and prevent users from
+closing the ad:
+
+https://developers.google.com/admob/android/next-gen/rel-notes
+
+There is also a public AdMob Community thread with a reported Next-Gen SDK
+`NullPointerException` crash and stack trace:
+
+https://support.google.com/admob/thread/438640611/admob-next-gen-1-1-0-fatal-exception-java-lang-nullpointerexception?hl=en
+
+Until that native SDK crash situation is clear, this package is not bumping the
+bundled `ads-mobile-sdk` dependency to `1.1.1`.
+
+## License
+
+MIT
