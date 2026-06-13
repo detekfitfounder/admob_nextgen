@@ -1,12 +1,12 @@
 # admob_nextgen
 
-Beta Flutter plugin for the Android Google Mobile Ads Next-Gen SDK.
+Flutter plugin for the Android Google Mobile Ads Next-Gen SDK.
 
 `admob_nextgen` provides Android-only wrappers for initialization, UMP consent,
 banner ads, interstitial ads, rewarded ads, rewarded interstitial ads, app open
 ads, preloaders, and customizable native ad templates.
 
-Beta note: this package targets Android only. iOS is not implemented yet.
+Platform note: this package targets Android only. iOS is not implemented yet.
 
 This is an unofficial Flutter plugin. It is not published, endorsed, or
 maintained by Google.
@@ -54,7 +54,7 @@ Add the package to `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  admob_nextgen: ^0.1.0-beta.5
+  admob_nextgen: ^0.1.0
 ```
 
 Then run:
@@ -83,6 +83,15 @@ ca-app-pub-3940256099942544~3347511713
 Use AdMob test ad unit IDs while developing. Do not use live ad units for local
 testing.
 
+## Mediation compatibility
+
+Do not use this package together with Google Mobile Ads mediation adapters such
+as Meta/Facebook Audience Network mediation. The Google Mobile Ads Next-Gen SDK
+is not currently compatible with existing mediation adapters, and adding a
+mediation dependency can produce duplicate Google Play services / GMS class
+errors at build time. Remove the mediation adapter dependency and use direct
+Next-Gen SDK ad units with this package.
+
 ## Initialize ads and consent
 
 Important: unlike the old Google Mobile Ads Flutter SDK flow, this package
@@ -96,19 +105,35 @@ import 'package:flutter/widgets.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await ConsentInformation.instance.requestConsentInfoUpdate(
-    const ConsentRequestParameters(),
-  );
+  try {
+    await ConsentInformation.instance.requestConsentInfoUpdate(
+      const ConsentRequestParameters(),
+    );
 
-  await ConsentForm.loadAndShowConsentFormIfRequired();
+    final formError = await ConsentForm.loadAndShowConsentFormIfRequired();
+    if (formError != null) {
+      print('Consent form failed: $formError');
+    }
 
-  if (await ConsentInformation.instance.canRequestAds()) {
-    await MobileAds.initialize();
+    if (await ConsentInformation.instance.canRequestAds()) {
+      await MobileAds.initialize();
+    }
+  } on ConsentFormException catch (error) {
+    print('Consent flow failed: ${error.error}');
+  } catch (error) {
+    print('Consent flow failed: $error');
   }
 
   runApp(const MyApp());
 }
 ```
+
+Warning: wrap the splash/startup consent flow in `try/catch`. If the device is
+offline and `requestConsentInfoUpdate()` or
+`loadAndShowConsentFormIfRequired()` fails, an uncaught exception can prevent
+your splash flow from completing and leave the app stuck on the splash screen.
+Catch `ConsentFormException` and any unexpected startup error, log or report
+the failure, and continue to `runApp()` with your app's fallback state.
 
 Optionally configure test devices:
 
