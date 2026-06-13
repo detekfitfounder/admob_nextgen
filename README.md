@@ -25,7 +25,7 @@ initialization, UMP consent, banners, interstitial ads, rewarded ads, rewarded
 interstitial ads, app open ads, preloaders, request targeting, and customizable
 native ad templates.
 
-> Android only. iOS is not implemented yet.
+> Android
 
 > Unofficial package. Not published, endorsed, or maintained by Google.
 
