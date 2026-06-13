@@ -1,3 +1,11 @@
+## 0.1.0
+
+- Marked the package stable.
+- Added README guidance to wrap startup consent calls in `try/catch` so an
+  offline consent failure cannot leave the app stuck on the splash screen.
+- Documented that Google Mobile Ads Next-Gen SDK mediation adapters are not
+  currently supported and can cause duplicate GMS class errors.
+
 ## 0.1.0-beta.5
 
 - Added Google-compatible `AppStateEventNotifier` foreground/background
