@@ -15,49 +15,21 @@ abstract final class BannerAdErrorCode {
   static const int noFill = 3;
 }
 
-/// Optional retry tuning for [BannerAdController.reload] and automatic
-/// reload-on-failure when a controller is attached to [BannerAdView].
-///
-/// Defaults are conservative for AdMob policy: at most two reload attempts,
-/// no artificial delay, and retries only for no-fill and network errors.
-class BannerReloadOptions {
-  const BannerReloadOptions({
-    this.maxAttempts = 2,
-    this.delay = Duration.zero,
-    this.retryOnNoFill = true,
-    this.retryOnNetworkError = true,
-  });
-
-  /// Maximum number of reload attempts after a load failure before giving up.
-  ///
-  /// Does not count the initial load — only [BannerAdController.reload] calls
-  /// triggered by failures (automatic or manual).
-  final int maxAttempts;
-
-  /// Wait time before each automatic reload after a failure.
-  ///
-  /// Manual [BannerAdController.reload] calls are not delayed.
-  final Duration delay;
-
-  /// Whether to reload when the SDK reports no fill ([BannerAdErrorCode.noFill]).
-  final bool retryOnNoFill;
-
-  /// Whether to reload on network errors ([BannerAdErrorCode.networkError]).
-  final bool retryOnNetworkError;
-}
-
-/// Returns whether [error] should trigger an automatic banner reload under
-/// [options].
+/// Returns whether [error] should trigger an automatic banner reload.
 ///
 /// Invalid requests and internal errors are never retried — retrying those
 /// can waste requests and risks AdMob policy issues.
 @visibleForTesting
-bool isBannerErrorRetryable(AdError error, BannerReloadOptions options) {
+bool isBannerErrorRetryable(
+  AdError error, {
+  bool retryOnNoFill = true,
+  bool retryOnNetworkError = true,
+}) {
   switch (error.code) {
     case BannerAdErrorCode.networkError:
-      return options.retryOnNetworkError;
+      return retryOnNetworkError;
     case BannerAdErrorCode.noFill:
-      return options.retryOnNoFill;
+      return retryOnNoFill;
     case BannerAdErrorCode.invalidRequest:
     case BannerAdErrorCode.internalError:
       return false;
@@ -73,10 +45,13 @@ bool isBannerErrorRetryable(AdError error, BannerReloadOptions options) {
 /// call [dispose] when the placement is removed.
 ///
 /// ```dart
-/// final bannerController = BannerAdController();
+/// final adController = BannerAdController(
+///   maxAttempts: 2,
+///   retryOnNetworkError: true,
+/// );
 ///
 /// BannerAdView(
-///   controller: bannerController,
+///   controller: adController,
 ///   adUnitId: 'ca-app-pub-…/…',
 ///   listener: BannerAdListener(
 ///     onAdFailedToLoad: (error) => debugPrint('Banner failed: $error'),
@@ -84,13 +59,31 @@ bool isBannerErrorRetryable(AdError error, BannerReloadOptions options) {
 /// )
 ///
 /// // Later, force a fresh load:
-/// await bannerController.reload();
+/// await adController.reload();
 /// ```
 class BannerAdController {
-  BannerAdController({this.reloadOptions = const BannerReloadOptions()});
+  BannerAdController({
+    this.maxAttempts = 2,
+    this.delay = Duration.zero,
+    this.retryOnNoFill = true,
+    this.retryOnNetworkError = true,
+  });
 
-  /// Default retry settings for automatic reload-on-failure.
-  final BannerReloadOptions reloadOptions;
+  /// Maximum reload attempts after a load failure before giving up.
+  ///
+  /// Does not count the initial load.
+  final int maxAttempts;
+
+  /// Wait time before each automatic reload after a failure.
+  ///
+  /// Manual [reload] calls are not delayed.
+  final Duration delay;
+
+  /// Whether to reload when the SDK reports no fill ([BannerAdErrorCode.noFill]).
+  final bool retryOnNoFill;
+
+  /// Whether to reload on network errors ([BannerAdErrorCode.networkError]).
+  final bool retryOnNetworkError;
 
   MethodChannel? _viewChannel;
   void Function()? _markFailed;
@@ -98,24 +91,43 @@ class BannerAdController {
   Timer? _retryTimer;
   int _failureReloadCount = 0;
   bool _disposed = false;
-  BannerReloadOptions? _activeOptions;
+  _ActiveReloadSettings? _activeSettings;
 
   /// Whether this controller is bound to a mounted [BannerAdView] platform view.
   bool get isAttached => _viewChannel != null;
 
+  _ActiveReloadSettings get _settings =>
+      _activeSettings ??
+      _ActiveReloadSettings(
+        maxAttempts: maxAttempts,
+        delay: delay,
+        retryOnNoFill: retryOnNoFill,
+        retryOnNetworkError: retryOnNetworkError,
+      );
+
   /// Requests a new load on the attached banner view.
   ///
-  /// Resets the automatic retry counter. Pass [options] to override the
+  /// Resets the automatic retry counter. Pass any retry field to override the
   /// controller defaults for subsequent automatic retries in this load cycle.
   ///
   /// Does nothing if the controller is not attached or has been [dispose]d.
-  Future<void> reload({BannerReloadOptions? options}) async {
+  Future<void> reload({
+    int? maxAttempts,
+    Duration? delay,
+    bool? retryOnNoFill,
+    bool? retryOnNetworkError,
+  }) async {
     if (_disposed) return;
     final channel = _viewChannel;
     if (channel == null) return;
 
     _failureReloadCount = 0;
-    _activeOptions = options ?? reloadOptions;
+    _activeSettings = _settings.copyWith(
+      maxAttempts: maxAttempts,
+      delay: delay,
+      retryOnNoFill: retryOnNoFill,
+      retryOnNetworkError: retryOnNetworkError,
+    );
     _retryTimer?.cancel();
     _clearFailed?.call();
 
@@ -143,7 +155,6 @@ class BannerAdController {
     _viewChannel = channel;
     _markFailed = markFailed;
     _clearFailed = clearFailed;
-    _activeOptions ??= reloadOptions;
   }
 
   void _unbindView() {
@@ -152,7 +163,7 @@ class BannerAdController {
     _clearFailed = null;
     _viewChannel = null;
     _failureReloadCount = 0;
-    _activeOptions = null;
+    _activeSettings = null;
   }
 
   void _onAdLoaded() {
@@ -164,14 +175,18 @@ class BannerAdController {
   void _onAdFailedToLoad(AdError error) {
     if (_disposed) return;
 
-    final options = _activeOptions ?? reloadOptions;
+    final settings = _settings;
 
-    if (!isBannerErrorRetryable(error, options)) {
+    if (!isBannerErrorRetryable(
+      error,
+      retryOnNoFill: settings.retryOnNoFill,
+      retryOnNetworkError: settings.retryOnNetworkError,
+    )) {
       _markFailed?.call();
       return;
     }
 
-    if (_failureReloadCount >= options.maxAttempts) {
+    if (_failureReloadCount >= settings.maxAttempts) {
       _markFailed?.call();
       return;
     }
@@ -179,8 +194,8 @@ class BannerAdController {
     _failureReloadCount++;
     _retryTimer?.cancel();
 
-    if (options.delay > Duration.zero) {
-      _retryTimer = Timer(options.delay, _invokeReload);
+    if (settings.delay > Duration.zero) {
+      _retryTimer = Timer(settings.delay, _invokeReload);
     } else {
       _invokeReload();
     }
@@ -197,5 +212,33 @@ class BannerAdController {
       debugPrint('[admob_nextgen] Banner auto-reload failed: $e\n$st');
       _markFailed?.call();
     }
+  }
+}
+
+class _ActiveReloadSettings {
+  const _ActiveReloadSettings({
+    required this.maxAttempts,
+    required this.delay,
+    required this.retryOnNoFill,
+    required this.retryOnNetworkError,
+  });
+
+  final int maxAttempts;
+  final Duration delay;
+  final bool retryOnNoFill;
+  final bool retryOnNetworkError;
+
+  _ActiveReloadSettings copyWith({
+    int? maxAttempts,
+    Duration? delay,
+    bool? retryOnNoFill,
+    bool? retryOnNetworkError,
+  }) {
+    return _ActiveReloadSettings(
+      maxAttempts: maxAttempts ?? this.maxAttempts,
+      delay: delay ?? this.delay,
+      retryOnNoFill: retryOnNoFill ?? this.retryOnNoFill,
+      retryOnNetworkError: retryOnNetworkError ?? this.retryOnNetworkError,
+    );
   }
 }

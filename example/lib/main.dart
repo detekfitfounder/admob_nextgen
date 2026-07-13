@@ -382,7 +382,10 @@ class _BottomBannerAdState extends State<BottomBannerAd> {
   @override
   void initState() {
     super.initState();
-    _controller = BannerAdController(reloadOptions: const BannerReloadOptions(maxAttempts: 2, delay: Duration(seconds: 2)));
+    _controller = BannerAdController(
+      maxAttempts: 2,
+      delay: const Duration(seconds: 2),
+    );
   }
 
   @override

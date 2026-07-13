@@ -163,21 +163,19 @@ Available sizes:
 ### Banner reload and automatic retry
 
 Attach a `BannerAdController` to reload a banner without recreating the widget.
-When a load fails, the controller can automatically retry using
-`BannerReloadOptions`.
+When a load fails, the controller can automatically retry using the optional
+retry fields on the controller.
 
 ```dart
-final bannerController = BannerAdController(
-  reloadOptions: const BannerReloadOptions(
-    maxAttempts: 2,
-    delay: Duration.zero,
-    retryOnNoFill: true,
-    retryOnNetworkError: true,
-  ),
+final adController = BannerAdController(
+  maxAttempts: 2,
+  delay: Duration.zero,
+  retryOnNoFill: true,
+  retryOnNetworkError: true,
 );
 
 BannerAdView(
-  controller: bannerController,
+  controller: adController,
   adUnitId: 'ca-app-pub-3940256099942544/9214589741',
   size: const AdSize.largeAnchored(),
   height: 120,
@@ -188,15 +186,18 @@ BannerAdView(
 )
 
 // Manual reload:
-await bannerController.reload();
+await adController.reload();
+
+// Override retry fields for one reload cycle:
+await adController.reload(maxAttempts: 3, delay: Duration(seconds: 20));
 
 // Dispose when the placement is removed:
-bannerController.dispose();
+adController.dispose();
 ```
 
-`BannerReloadOptions` defaults:
+`BannerAdController` defaults:
 
-| Option | Default | Notes |
+| Parameter | Default | Notes |
 | --- | --- | --- |
 | `maxAttempts` | `2` | Reload tries after a failure, not counting the initial load |
 | `delay` | `Duration.zero` | Wait before each automatic reload; manual `reload()` is not delayed |
@@ -204,8 +205,8 @@ bannerController.dispose();
 | `retryOnNetworkError` | `true` | Retries GMA error code `2` |
 
 Invalid requests (code `1`) and internal SDK errors (code `0`) are never
-retried. Override options per reload cycle with `bannerController.reload(options:
-...)`.
+retried. Pass the same optional fields to `reload()` to override them for one
+load cycle.
 
 Without a controller, `BannerAdView` keeps the previous behavior: on load
 failure it collapses to `placeholder` (or `SizedBox.shrink()`).
