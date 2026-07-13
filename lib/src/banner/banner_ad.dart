@@ -101,6 +101,9 @@ class BannerAdView extends StatefulWidget {
 
   /// Optional widget shown on non-Android platforms, or after the ad fails
   /// to load. Pass nothing to collapse the space entirely in those cases.
+  ///
+  /// When [height] is set, the placeholder is constrained to the same height
+  /// as the banner ad view.
   final Widget? placeholder;
 
   /// Convenience shortcut for the common case of "wrap me in a SizedBox of
@@ -220,14 +223,22 @@ class _BannerAdViewState extends State<BannerAdView> {
     super.dispose();
   }
 
+  Widget _constrainHeight(Widget child) {
+    final height = widget.height;
+    if (height != null) {
+      return SizedBox(height: height, child: child);
+    }
+    return child;
+  }
+
   @override
   Widget build(BuildContext context) {
     if (kIsWeb || !Platform.isAndroid) {
-      return widget.placeholder ?? const SizedBox.shrink();
+      return _constrainHeight(widget.placeholder ?? const SizedBox.shrink());
     }
 
     if (_adFailed) {
-      return widget.placeholder ?? const SizedBox.shrink();
+      return _constrainHeight(widget.placeholder ?? const SizedBox.shrink());
     }
 
     final params = <String, dynamic>{
@@ -246,9 +257,6 @@ class _BannerAdViewState extends State<BannerAdView> {
       creationParamsCodec: const StandardMessageCodec(),
     );
 
-    if (widget.height != null) {
-      return SizedBox(height: widget.height, child: adView);
-    }
-    return adView;
+    return _constrainHeight(adView);
   }
 }

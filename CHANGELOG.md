@@ -12,7 +12,8 @@
 - Default retry limits when enabled: up to 2 reload attempts, no delay.
 - Updated the example app bottom banner with reload controls and failure
   simulation for manual testing.
-- Added unit tests for banner reload retry decisions.
+- Fixed `BannerAdView` placeholder sizing so it uses the same [height] constraint
+  as the loaded banner.
 
 ## 0.1.0
 
