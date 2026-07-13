@@ -220,10 +220,12 @@ class NextGenBannerAdView(
         return when (sizeType) {
             "largeAnchored" -> AdSize.getLargeAnchoredAdaptiveBannerAdSize(activity, widthDp)
             "inline" -> AdSize.getInlineAdaptiveBannerAdSize(widthDp, maxHeightDp)
-            "mediumRectangle" -> AdSize(
-                widthDp,
-                if (maxHeightDp > 0) maxHeightDp else AdSize.MEDIUM_RECTANGLE_HEIGHT,
-            )
+            "banner" -> AdSize.BANNER
+            "largeBanner" -> AdSize.LARGE_BANNER
+            "mediumRectangle" -> AdSize.MEDIUM_RECTANGLE
+            "fullBanner" -> AdSize.FULL_BANNER
+            "leaderboard" -> AdSize.LEADERBOARD
+            "fixed" -> AdSize(widthDp, maxHeightDp)
             else -> AdSize.getCurrentOrientationAnchoredAdaptiveBannerAdSize(activity, widthDp)
         }
     }

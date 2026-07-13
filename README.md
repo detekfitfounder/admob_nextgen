@@ -39,7 +39,7 @@ targeting, and customizable native ad templates.
 
 - Google Mobile Ads Next-Gen SDK initialization.
 - UMP consent helpers.
-- Banner ads with anchored, large anchored, and inline adaptive sizes.
+- Banner ads with anchored, large anchored, inline adaptive, and IAB fixed sizes.
 - Banner reload via `BannerAdController` with optional automatic retry on failure.
 - Interstitial, rewarded, rewarded interstitial, and app open ads.
 - Interstitial and rewarded interstitial preloaders.
@@ -51,7 +51,7 @@ targeting, and customizable native ad templates.
 
 ```yaml
 dependencies:
-  admob_nextgen: ^0.1.0
+  admob_nextgen: ^0.1.2
 ```
 
 Then run:
@@ -156,30 +156,52 @@ BannerAdView(
 
 Available sizes:
 
-- `AdSize.anchored()`
-- `AdSize.largeAnchored()`
-- `AdSize.inline()`
-- `AdSize.mediumRectangle()` — fixed IAB medium rectangle, 300x250 dp by default
-  (custom `width` / `height` supported)
+**Adaptive** (recommended for phones):
 
-For `AdSize.mediumRectangle()`, give the widget a container at least as large as
-the chosen height:
+- `AdSize.anchored()` — bottom/top bar; SDK picks height
+- `AdSize.largeAnchored()` — taller bottom/top bar
+- `AdSize.inline()` — inside scrollable content
+
+**Fixed IAB standard sizes:**
+
+| API | Size (dp) | Typical use |
+| --- | --- | --- |
+| `AdSize.banner()` | 320×50 | Standard small banner |
+| `AdSize.largeBanner()` | 320×100 | Larger banner |
+| `AdSize.mediumRectangle()` | 300×250 | In-content MREC slot |
+| `AdSize.fullBanner()` | 468×60 | Tablets |
+| `AdSize.leaderboard()` | 728×90 | Tablet top bar |
+
+**Custom fixed** (use sparingly — non-standard sizes may reduce fill):
+
+- `AdSize.fixed(width: 320, height: 200)`
+
+For fixed sizes, pass [BannerAdView.height] using [AdSize.suggestedHeightDp]
+(only for `banner`, `largeBanner`, `mediumRectangle`, `fullBanner`,
+`leaderboard`, and `fixed`):
 
 ```dart
-// Standard IAB medium rectangle (300x250):
+const size = AdSize.mediumRectangle();
+
 BannerAdView(
   adUnitId: 'ca-app-pub-3940256099942544/9214589741',
-  size: const AdSize.mediumRectangle(),
-  height: 250,
+  size: size,
+  height: size.suggestedHeightDp,
 )
 
-// Custom fixed size:
+// Custom non-standard fixed size:
+const customSize = AdSize.fixed(width: 320, height: 200);
+
 BannerAdView(
   adUnitId: 'ca-app-pub-3940256099942544/9214589741',
-  size: const AdSize.mediumRectangle(width: 320, height: 200),
-  height: 200,
+  size: customSize,
+  height: customSize.suggestedHeightDp,
 )
 ```
+
+Google recommends **adaptive** banners (`anchored`, `largeAnchored`, `inline`)
+over fixed sizes on phones for better fill rates. Use fixed IAB sizes when your
+layout requires an exact slot (e.g. a 300×250 card in a feed).
 
 ### Banner reload and automatic retry
 

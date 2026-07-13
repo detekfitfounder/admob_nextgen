@@ -1,7 +1,19 @@
+## 0.1.2
+
+- Added fixed IAB banner sizes: `AdSize.banner()`, `AdSize.largeBanner()`,
+  `AdSize.mediumRectangle()` (300×250 MREC), `AdSize.fullBanner()`, and
+  `AdSize.leaderboard()`.
+- Added `AdSize.fixed(width:, height:)` for non-standard custom fixed sizes
+  (documented as potentially lower fill than IAB standards).
+- Added `AdSize.suggestedHeightDp` (`double`) for fixed banner sizes only
+  (`banner`, `largeBanner`, `mediumRectangle`, `fullBanner`, `leaderboard`,
+  `fixed`); throws [StateError] for adaptive sizes.
+- Refactored `AdSize.mediumRectangle()` to the standard 300×250 MREC only;
+  custom dimensions now use `AdSize.fixed()`.
+- Added unit tests for IAB banner size dimensions.
+
 ## 0.1.1
 
-- Added `AdSize.mediumRectangle()` with optional `width` and `height` for fixed
-  banner sizes (defaults to the IAB standard 300x250 dp).
 - Added `BannerAdController` with native `reload()` support for `BannerAdView`.
 - Optional retry tuning on `BannerAdController`: `maxAttempts`, `delay`,
   `retryOnNoFill`, and `retryOnNetworkError` (no wrapper object required).
@@ -14,6 +26,7 @@
   simulation for manual testing.
 - Fixed `BannerAdView` placeholder sizing so it uses the same [height] constraint
   as the loaded banner.
+- Added unit tests for banner reload retry decisions.
 
 ## 0.1.0
 

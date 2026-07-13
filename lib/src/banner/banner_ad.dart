@@ -50,8 +50,11 @@ class BannerAdListener {
 /// parent (Flutter PlatformViews need bounded constraints to be created).
 /// Wrap it in a `SizedBox`, place it inside a `Column` with a `SizedBox`
 /// sibling, or pass an explicit [height] — otherwise the ad will silently
-/// fail to render. A 50-100dp height covers most adaptive banner sizes;
-/// 100-130dp for [AdSize.largeAnchored].
+/// fail to render. Suggested heights: 50–100 dp for [AdSize.anchored],
+/// 100–130 dp for [AdSize.largeAnchored]. For fixed IAB sizes use
+/// [AdSize.suggestedHeightDp] on [AdSize.banner], [AdSize.largeBanner],
+/// [AdSize.mediumRectangle], [AdSize.fullBanner], [AdSize.leaderboard], or
+/// [AdSize.fixed].
 ///
 /// **Initialization.** `MobileAds.initialize()` must complete before this
 /// widget mounts.
