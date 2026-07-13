@@ -21,9 +21,9 @@
 Flutter wrappers for the Android Google Mobile Ads Next-Gen SDK.
 
 `admob_nextgen` provides a Dart-first API for Google Mobile Ads Next-Gen
-initialization, UMP consent, banners, interstitial ads, rewarded ads, rewarded
-interstitial ads, app open ads, preloaders, request targeting, and customizable
-native ad templates.
+initialization, UMP consent, banners (with reload support), interstitial ads,
+rewarded ads, rewarded interstitial ads, app open ads, preloaders, request
+targeting, and customizable native ad templates.
 
 > Android
 
@@ -40,6 +40,7 @@ native ad templates.
 - Google Mobile Ads Next-Gen SDK initialization.
 - UMP consent helpers.
 - Banner ads with anchored, large anchored, and inline adaptive sizes.
+- Banner reload via `BannerAdController` with optional automatic retry on failure.
 - Interstitial, rewarded, rewarded interstitial, and app open ads.
 - Interstitial and rewarded interstitial preloaders.
 - Three prebuilt native ad templates.
@@ -158,6 +159,56 @@ Available sizes:
 - `AdSize.anchored()`
 - `AdSize.largeAnchored()`
 - `AdSize.inline()`
+
+### Banner reload and automatic retry
+
+Attach a `BannerAdController` to reload a banner without recreating the widget.
+When a load fails, the controller can automatically retry using
+`BannerReloadOptions`.
+
+```dart
+final bannerController = BannerAdController(
+  reloadOptions: const BannerReloadOptions(
+    maxAttempts: 2,
+    delay: Duration.zero,
+    retryOnNoFill: true,
+    retryOnNetworkError: true,
+  ),
+);
+
+BannerAdView(
+  controller: bannerController,
+  adUnitId: 'ca-app-pub-3940256099942544/9214589741',
+  size: const AdSize.largeAnchored(),
+  height: 120,
+  listener: BannerAdListener(
+    onAdLoaded: () => print('Banner loaded'),
+    onAdFailedToLoad: (error) => print('Banner failed: $error'),
+  ),
+)
+
+// Manual reload:
+await bannerController.reload();
+
+// Dispose when the placement is removed:
+bannerController.dispose();
+```
+
+`BannerReloadOptions` defaults:
+
+| Option | Default | Notes |
+| --- | --- | --- |
+| `maxAttempts` | `2` | Reload tries after a failure, not counting the initial load |
+| `delay` | `Duration.zero` | Wait before each automatic reload; manual `reload()` is not delayed |
+| `retryOnNoFill` | `true` | Retries GMA error code `3` |
+| `retryOnNetworkError` | `true` | Retries GMA error code `2` |
+
+Invalid requests (code `1`) and internal SDK errors (code `0`) are never
+retried. Override options per reload cycle with `bannerController.reload(options:
+...)`.
+
+Without a controller, `BannerAdView` keeps the previous behavior: on load
+failure it collapses to `placeholder` (or `SizedBox.shrink()`).
 
 ## Interstitial Ad
 
@@ -362,7 +413,8 @@ Explicitly call `dispose()` only when abandoning a loaded ad before showing it.
 
 Native ads and banners use this package's template/widget APIs and are not
 drop-in replacements for the old `AdWidget`, custom native factories, or
-`BannerAd` constructor.
+`BannerAd` constructor. Use `BannerAdController` for banner reload instead of
+manually disposing and recreating a `BannerAd` instance.
 
 ## Troubleshooting
 

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io' show Platform;
 
 import 'package:flutter/foundation.dart';
@@ -7,6 +8,8 @@ import 'package:flutter/services.dart';
 import '../core/ad_error.dart';
 import '../core/ad_request.dart';
 import 'ad_size.dart';
+
+part 'banner_controller.dart';
 
 /// Lifecycle callbacks fired by a [BannerAdView].
 class BannerAdListener {
@@ -57,9 +60,12 @@ class BannerAdListener {
 /// [SizedBox.shrink] (or the supplied [placeholder]).
 ///
 /// ```dart
+/// final bannerController = BannerAdController();
+///
 /// SizedBox(
 ///   height: 120,
 ///   child: BannerAdView(
+///     controller: bannerController,
 ///     adUnitId: 'ca-app-pub-…/…',
 ///     size: AdSize.largeAnchored(),
 ///   ),
@@ -70,6 +76,7 @@ class BannerAdView extends StatefulWidget {
     super.key,
     required this.adUnitId,
     this.size = const AdSize.anchored(),
+    this.controller,
     this.listener,
     this.placeholder,
     this.height,
@@ -82,6 +89,12 @@ class BannerAdView extends StatefulWidget {
 
   /// Logical size hint passed to the native banner.
   final AdSize size;
+
+  /// Optional controller for [reload] and automatic retry on load failure.
+  ///
+  /// When set, the banner stays mounted while retries are in progress instead
+  /// of collapsing to [placeholder] immediately.
+  final BannerAdController? controller;
 
   /// Optional callbacks for ad lifecycle events.
   final BannerAdListener? listener;
@@ -110,11 +123,34 @@ class _BannerAdViewState extends State<BannerAdView> {
     final channel = MethodChannel('next_gen_sdk/banner_ad_$id');
     _viewChannel = channel;
     channel.setMethodCallHandler(_handleEvent);
+    widget.controller?._bindView(
+      channel: channel,
+      markFailed: _markFailed,
+      clearFailed: _clearFailed,
+    );
+  }
+
+  void _markFailed() {
+    if (mounted) setState(() => _adFailed = true);
+  }
+
+  void _clearFailed() {
+    if (mounted) setState(() => _adFailed = false);
   }
 
   @override
   void didUpdateWidget(covariant BannerAdView oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (oldWidget.controller != widget.controller) {
+      oldWidget.controller?._unbindView();
+      if (_viewChannel != null) {
+        widget.controller?._bindView(
+          channel: _viewChannel!,
+          markFailed: _markFailed,
+          clearFailed: _clearFailed,
+        );
+      }
+    }
     final adUnitChanged = oldWidget.adUnitId != widget.adUnitId;
     final sizeChanged =
         oldWidget.size.widthDp != widget.size.widthDp ||
@@ -138,11 +174,17 @@ class _BannerAdViewState extends State<BannerAdView> {
     final map = (args is Map) ? args : const {};
     switch (call.method) {
       case 'onAdLoaded':
+        widget.controller?._onAdLoaded();
         widget.listener?.onAdLoaded?.call();
         break;
       case 'onAdFailedToLoad':
-        if (mounted) setState(() => _adFailed = true);
-        widget.listener?.onAdFailedToLoad?.call(AdError.fromMap(map));
+        final error = AdError.fromMap(map);
+        widget.listener?.onAdFailedToLoad?.call(error);
+        if (widget.controller != null) {
+          widget.controller!._onAdFailedToLoad(error);
+        } else if (mounted) {
+          setState(() => _adFailed = true);
+        }
         break;
       case 'onAdImpression':
         widget.listener?.onAdImpression?.call();
@@ -172,6 +214,7 @@ class _BannerAdViewState extends State<BannerAdView> {
 
   @override
   void dispose() {
+    widget.controller?._unbindView();
     _viewChannel?.setMethodCallHandler(null);
     _viewChannel = null;
     super.dispose();

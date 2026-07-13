@@ -21,14 +21,14 @@ import io.flutter.plugin.platform.PlatformView
 import io.aban.admob_nextgen.AdmobNextgenPlugin
 import io.aban.admob_nextgen.core.buildBannerAdRequest
 import io.aban.admob_nextgen.core.toFlutterMap
+
 class NextGenBannerAdView(
     private val hostContext: Context,
     private val activity: Activity?,
     viewId: Int,
     messenger: BinaryMessenger,
     creationParams: Map<String, Any?>,
-) : PlatformView
-{
+) : PlatformView {
 
     companion object {
         private const val TAG = "NextGenBannerAdView"
@@ -37,6 +37,12 @@ class NextGenBannerAdView(
     private val container: FrameLayout = FrameLayout(hostContext)
     private var adView: AdView? = null
     private val eventChannel = MethodChannel(messenger, "next_gen_sdk/banner_ad_$viewId")
+    private var storedAdUnitId: String? = null
+    private var storedWidthDp: Int = 360
+    private var storedSizeType: String = "anchored"
+    private var storedMaxHeightDp: Int = 0
+    private var storedRequestParams: Map<String, Any?>? = null
+    private var isLoading = false
 
     init {
         val adUnitId = creationParams["adUnitId"] as? String
@@ -46,36 +52,94 @@ class NextGenBannerAdView(
         @Suppress("UNCHECKED_CAST")
         val requestParams = creationParams["request"] as? Map<String, Any?>
 
+        eventChannel.setMethodCallHandler { call, result ->
+            when (call.method) {
+                "reload" -> {
+                    val act = activity
+                    if (act == null) {
+                        result.error(
+                            "NO_ACTIVITY",
+                            "Banner reload requires an Activity.",
+                            null,
+                        )
+                        return@setMethodCallHandler
+                    }
+                    val unitId = storedAdUnitId
+                    if (unitId.isNullOrBlank()) {
+                        result.error(
+                            "NOT_CONFIGURED",
+                            "Banner has no ad unit to reload.",
+                            null,
+                        )
+                        return@setMethodCallHandler
+                    }
+                    reloadAd(act)
+                    result.success(null)
+                }
+
+                else -> result.notImplemented()
+            }
+        }
+
         when {
             adUnitId.isNullOrBlank() -> Log.e(TAG, "adUnitId is required.")
             activity == null -> Log.e(
                 TAG,
                 "BannerAdView requires an Activity. Make sure the plugin is " +
-                        "attached to the host Activity before mounting the widget."
+                    "attached to the host Activity before mounting the widget.",
             )
+
             else -> {
                 if (!AdmobNextgenPlugin.isInitialized) {
                     Log.w(
                         TAG,
                         "MobileAds is not initialized. Call MobileAds.initialize() " +
-                                "before creating a BannerAdView."
+                            "before creating a BannerAdView.",
                     )
                 }
-                loadAd(adUnitId, widthDp, sizeType, maxHeightDp, requestParams, activity)
+                storeLoadParams(adUnitId, widthDp, sizeType, maxHeightDp, requestParams)
+                loadAd(activity)
             }
         }
     }
 
-    private fun loadAd(
+    private fun storeLoadParams(
         adUnitId: String,
         widthDp: Int,
         sizeType: String,
         maxHeightDp: Int,
         requestParams: Map<String, Any?>?,
-        activity: Activity,
     ) {
-        val adSize = resolveAdSize(activity, sizeType, widthDp, maxHeightDp)
-        val request = buildBannerAdRequest(adUnitId, adSize, requestParams)
+        storedAdUnitId = adUnitId
+        storedWidthDp = widthDp
+        storedSizeType = sizeType
+        storedMaxHeightDp = maxHeightDp
+        storedRequestParams = requestParams
+    }
+
+    private fun reloadAd(activity: Activity) {
+        if (isLoading) {
+            Log.d(TAG, "Reload skipped — banner load already in progress.")
+            return
+        }
+        tearDownAdView()
+        loadAd(activity)
+    }
+
+    private fun tearDownAdView() {
+        adView?.let { view ->
+            container.removeView(view)
+            view.destroy()
+        }
+        adView = null
+    }
+
+    private fun loadAd(activity: Activity) {
+        val adUnitId = storedAdUnitId ?: return
+        isLoading = true
+
+        val adSize = resolveAdSize(activity, storedSizeType, storedWidthDp, storedMaxHeightDp)
+        val request = buildBannerAdRequest(adUnitId, adSize, storedRequestParams)
         val newAdView = AdView(activity)
         adView = newAdView
         container.addView(
@@ -83,13 +147,14 @@ class NextGenBannerAdView(
             FrameLayout.LayoutParams(
                 FrameLayout.LayoutParams.MATCH_PARENT,
                 FrameLayout.LayoutParams.WRAP_CONTENT,
-            )
+            ),
         )
 
         newAdView.loadAd(
             request,
             object : AdLoadCallback<BannerAd> {
                 override fun onAdLoaded(ad: BannerAd) {
+                    isLoading = false
                     Log.d(TAG, "Banner ad loaded.")
                     invokeOnMain("onAdLoaded", null)
                     ad.adEventCallback = object : BannerAdEventCallback {
@@ -110,12 +175,12 @@ class NextGenBannerAdView(
                         }
 
                         override fun onAdFailedToShowFullScreenContent(
-                            fullScreenContentError: FullScreenContentError
+                            fullScreenContentError: FullScreenContentError,
                         ) {
                             Log.w(TAG, "Banner ad failed to show: $fullScreenContentError")
                             invokeOnMain(
                                 "onAdFailedToShowFullScreenContent",
-                                fullScreenContentError.toFlutterMap()
+                                fullScreenContentError.toFlutterMap(),
                             )
                         }
                     }
@@ -128,17 +193,18 @@ class NextGenBannerAdView(
                             Log.w(TAG, "Banner ad failed to refresh: $loadAdError")
                             invokeOnMain(
                                 "onAdFailedToRefresh",
-                                loadAdError.toFlutterMap()
+                                loadAdError.toFlutterMap(),
                             )
                         }
                     }
                 }
 
                 override fun onAdFailedToLoad(adError: LoadAdError) {
+                    isLoading = false
                     Log.w(TAG, "Banner ad failed to load: $adError")
                     invokeOnMain(
                         "onAdFailedToLoad",
-                        adError.toFlutterMap()
+                        adError.toFlutterMap(),
                     )
                 }
             },
@@ -167,11 +233,8 @@ class NextGenBannerAdView(
     override fun getView(): View = container
 
     override fun dispose() {
-        adView?.let { view ->
-            (view.parent as? android.view.ViewGroup)?.removeView(view)
-            view.destroy()
-        }
-        adView = null
+        isLoading = false
+        tearDownAdView()
         eventChannel.setMethodCallHandler(null)
     }
 }

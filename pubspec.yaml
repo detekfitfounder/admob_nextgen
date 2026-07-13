@@ -1,14 +1,14 @@
 name: admob_nextgen
 description: A Flutter plugin for Android Google Mobile Ads Next-Gen SDK with consent, banners, fullscreen ads, preloaders, and customizable native templates.
-version: 0.1.0
-homepage: https://github.com/Aban3049
-repository: https://github.com/Aban3049/admob_nextgen
-issue_tracker: https://github.com/Aban3049/admob_nextgen/issues
+version: 0.1.1
+homepage: https://github.com/detekfitfounder/admob_nextgen
+repository: https://github.com/detekfitfounder/admob_nextgen
+issue_tracker: https://github.com/detekfitfounder/admob_nextgen/issues
 
 screenshots:
-  - description: 'Banner ad displayed at the bottom of the screen.'
+  - description: "Banner ad displayed at the bottom of the screen."
     path: screenshots/banner.webp
-  - description: 'Native small and large ad templates.'
+  - description: "Native small and large ad templates."
     path: screenshots/native.webp
 
 environment:

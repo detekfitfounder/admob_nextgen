@@ -65,28 +65,14 @@ class NativeDemoStyles {
 
 ThemeData buildDemoTheme() {
   return ThemeData(
-    colorScheme: ColorScheme.fromSeed(
-      seedColor: const Color(0xFF3D5AFE),
-      brightness: Brightness.light,
-    ),
+    colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF3D5AFE), brightness: Brightness.light),
     useMaterial3: true,
     textTheme: const TextTheme(
-      displayLarge: TextStyle(
-        fontFamily: 'Georgia',
-        fontWeight: FontWeight.w700,
-        letterSpacing: -1.0,
-      ),
-      headlineMedium: TextStyle(
-        fontWeight: FontWeight.w700,
-        letterSpacing: -0.5,
-      ),
+      displayLarge: TextStyle(fontFamily: 'Georgia', fontWeight: FontWeight.w700, letterSpacing: -1.0),
+      headlineMedium: TextStyle(fontWeight: FontWeight.w700, letterSpacing: -0.5),
       titleLarge: TextStyle(fontWeight: FontWeight.w600, letterSpacing: -0.3),
       titleMedium: TextStyle(fontWeight: FontWeight.w600),
-      titleSmall: TextStyle(
-        fontWeight: FontWeight.w600,
-        letterSpacing: 0.5,
-        fontSize: 11,
-      ),
+      titleSmall: TextStyle(fontWeight: FontWeight.w600, letterSpacing: 0.5, fontSize: 11),
       bodyLarge: TextStyle(fontSize: 14, height: 1.5),
       bodyMedium: TextStyle(fontSize: 13, height: 1.4),
     ),
@@ -94,22 +80,13 @@ ThemeData buildDemoTheme() {
       elevation: 0,
       scrolledUnderElevation: 1,
       centerTitle: false,
-      titleTextStyle: TextStyle(
-        fontWeight: FontWeight.w700,
-        fontSize: 18,
-        letterSpacing: -0.4,
-        color: Color(0xFF1A1A2E),
-      ),
+      titleTextStyle: TextStyle(fontWeight: FontWeight.w700, fontSize: 18, letterSpacing: -0.4, color: Color(0xFF1A1A2E)),
     ),
     filledButtonTheme: FilledButtonThemeData(
       style: FilledButton.styleFrom(
         minimumSize: const Size.fromHeight(52),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-        textStyle: const TextStyle(
-          fontWeight: FontWeight.w600,
-          fontSize: 15,
-          letterSpacing: 0.2,
-        ),
+        textStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15, letterSpacing: 0.2),
         elevation: 2,
         shadowColor: const Color(0x443D5AFE),
       ),
@@ -118,11 +95,7 @@ ThemeData buildDemoTheme() {
       style: OutlinedButton.styleFrom(
         minimumSize: const Size.fromHeight(52),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-        textStyle: const TextStyle(
-          fontWeight: FontWeight.w600,
-          fontSize: 15,
-          letterSpacing: 0.2,
-        ),
+        textStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15, letterSpacing: 0.2),
         side: const BorderSide(color: Color(0xFF3D5AFE), width: 1.5),
       ),
     ),
@@ -160,24 +133,13 @@ class DemoAppBar extends StatelessWidget implements PreferredSizeWidget {
         padding: const EdgeInsets.all(10),
         child: Container(
           decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [colorScheme.primary, colorScheme.tertiary],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
+            gradient: LinearGradient(colors: [colorScheme.primary, colorScheme.tertiary], begin: Alignment.topLeft, end: Alignment.bottomRight),
             borderRadius: BorderRadius.circular(10),
           ),
-          child: const Icon(
-            Icons.ads_click_rounded,
-            color: Colors.white,
-            size: 20,
-          ),
+          child: const Icon(Icons.ads_click_rounded, color: Colors.white, size: 20),
         ),
       ),
-      title: Text(
-        'Next Gen Ads',
-        style: textTheme.titleLarge?.copyWith(color: const Color(0xFF1A1A2E)),
-      ),
+      title: Text('Next Gen Ads', style: textTheme.titleLarge?.copyWith(color: const Color(0xFF1A1A2E))),
       actions: [
         Padding(
           padding: const EdgeInsets.only(right: 16),
@@ -195,15 +157,9 @@ class AdsReadyChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final backgroundColor = adsReady
-        ? const Color(0xFFE8F5E9)
-        : const Color(0xFFFFF3E0);
-    final borderColor = adsReady
-        ? const Color(0xFF81C784)
-        : const Color(0xFFFFB74D);
-    final foregroundColor = adsReady
-        ? const Color(0xFF2E7D32)
-        : const Color(0xFFE65100);
+    final backgroundColor = adsReady ? const Color(0xFFE8F5E9) : const Color(0xFFFFF3E0);
+    final borderColor = adsReady ? const Color(0xFF81C784) : const Color(0xFFFFB74D);
+    final foregroundColor = adsReady ? const Color(0xFF2E7D32) : const Color(0xFFE65100);
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
@@ -218,21 +174,12 @@ class AdsReadyChip extends StatelessWidget {
           Container(
             width: 7,
             height: 7,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: adsReady
-                  ? const Color(0xFF43A047)
-                  : const Color(0xFFFB8C00),
-            ),
+            decoration: BoxDecoration(shape: BoxShape.circle, color: adsReady ? const Color(0xFF43A047) : const Color(0xFFFB8C00)),
           ),
           const SizedBox(width: 5),
           Text(
             adsReady ? 'Live' : 'Offline',
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-              color: foregroundColor,
-            ),
+            style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: foregroundColor),
           ),
         ],
       ),
@@ -256,23 +203,14 @@ class StatusCard extends StatelessWidget {
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: color.withValues(alpha: 0.25), width: 1.5),
-        boxShadow: [
-          BoxShadow(
-            color: color.withValues(alpha: 0.08),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        boxShadow: [BoxShadow(color: color.withValues(alpha: 0.08), blurRadius: 12, offset: const Offset(0, 4))],
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
             padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.10),
-              borderRadius: BorderRadius.circular(10),
-            ),
+            decoration: BoxDecoration(color: color.withValues(alpha: 0.10), borderRadius: BorderRadius.circular(10)),
             child: Icon(statusIcon(status), color: color, size: 20),
           ),
           const SizedBox(width: 12),
@@ -280,20 +218,11 @@ class StatusCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'Status',
-                  style: textTheme.titleSmall?.copyWith(
-                    color: const Color(0xFF9E9E9E),
-                    letterSpacing: 0.8,
-                  ),
-                ),
+                Text('Status', style: textTheme.titleSmall?.copyWith(color: const Color(0xFF9E9E9E), letterSpacing: 0.8)),
                 const SizedBox(height: 4),
                 Text(
                   status,
-                  style: textTheme.bodyLarge?.copyWith(
-                    color: const Color(0xFF1A1A2E),
-                    fontWeight: FontWeight.w500,
-                  ),
+                  style: textTheme.bodyLarge?.copyWith(color: const Color(0xFF1A1A2E), fontWeight: FontWeight.w500),
                 ),
               ],
             ),
@@ -316,11 +245,7 @@ class PrivacySection extends StatelessWidget {
       children: [
         const SectionLabel(label: 'CONSENT'),
         const SizedBox(height: 8),
-        OutlinedButton.icon(
-          onPressed: onShowPrivacyOptions,
-          icon: const Icon(Icons.shield_outlined, size: 18),
-          label: const Text('Privacy Options'),
-        ),
+        OutlinedButton.icon(onPressed: onShowPrivacyOptions, icon: const Icon(Icons.shield_outlined, size: 18), label: const Text('Privacy Options')),
       ],
     );
   }
@@ -359,11 +284,7 @@ class FullScreenAdsSection extends StatelessWidget {
           label: const Text('Show Interstitial (preloaded)'),
         ),
         const SizedBox(height: 10),
-        FilledButton.icon(
-          onPressed: enabled ? onShowRewarded : null,
-          icon: const Icon(Icons.star_rounded, size: 20),
-          label: const Text('Show Rewarded'),
-        ),
+        FilledButton.icon(onPressed: enabled ? onShowRewarded : null, icon: const Icon(Icons.star_rounded, size: 20), label: const Text('Show Rewarded')),
         const SizedBox(height: 10),
         FilledButton.icon(
           onPressed: enabled ? onShowRewardedInterstitial : null,
@@ -411,14 +332,7 @@ class NativeAdsSection extends StatelessWidget {
         FilledButton.icon(
           onPressed: adsReady && !isLoading ? onLoadNativeAds : null,
           icon: isLoading
-              ? SizedBox(
-                  width: 18,
-                  height: 18,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2.5,
-                    color: colorScheme.onPrimary.withValues(alpha: 0.7),
-                  ),
-                )
+              ? SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2.5, color: colorScheme.onPrimary.withValues(alpha: 0.7)))
               : const Icon(Icons.photo_library_outlined, size: 20),
           label: Text(isLoading ? 'Loading Native...' : 'Load Native Ads'),
         ),
@@ -427,10 +341,7 @@ class NativeAdsSection extends StatelessWidget {
           NativeAdCard(
             label: 'Native Banner',
             icon: Icons.view_stream_rounded,
-            child: NativeBannerAdView(
-              nativeAd: bannerAd!,
-              style: NativeDemoStyles.banner,
-            ),
+            child: NativeBannerAdView(nativeAd: bannerAd!, style: NativeDemoStyles.banner),
           ),
           const SizedBox(height: 12),
         ],
@@ -438,10 +349,7 @@ class NativeAdsSection extends StatelessWidget {
           NativeAdCard(
             label: 'Native Small',
             icon: Icons.view_compact_rounded,
-            child: NativeSmallAdView(
-              nativeAd: smallAd!,
-              style: NativeDemoStyles.small,
-            ),
+            child: NativeSmallAdView(nativeAd: smallAd!, style: NativeDemoStyles.small),
           ),
           const SizedBox(height: 12),
         ],
@@ -449,10 +357,7 @@ class NativeAdsSection extends StatelessWidget {
           NativeAdCard(
             label: 'Native Large',
             icon: Icons.view_agenda_rounded,
-            child: NativeLargeAdView(
-              nativeAd: largeAd!,
-              style: NativeDemoStyles.large,
-            ),
+            child: NativeLargeAdView(nativeAd: largeAd!, style: NativeDemoStyles.large),
           ),
           const SizedBox(height: 8),
         ],
@@ -461,8 +366,45 @@ class NativeAdsSection extends StatelessWidget {
   }
 }
 
-class BottomBannerAd extends StatelessWidget {
+class BottomBannerAd extends StatefulWidget {
   const BottomBannerAd({super.key});
+
+  @override
+  State<BottomBannerAd> createState() => _BottomBannerAdState();
+}
+
+class _BottomBannerAdState extends State<BottomBannerAd> {
+  late final BannerAdController _controller;
+  var _status = 'Waiting for banner…';
+  var _useInvalidUnit = false;
+  var _placementKey = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = BannerAdController(reloadOptions: const BannerReloadOptions(maxAttempts: 2, delay: Duration(seconds: 2)));
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  String get _adUnitId => _useInvalidUnit ? 'ca-app-pub-invalid/invalid' : AdTestIds.banner;
+
+  void _log(String message) {
+    debugPrint('[banner-demo] $message');
+    if (mounted) setState(() => _status = message);
+  }
+
+  void _toggleInvalidUnit(bool value) {
+    setState(() {
+      _useInvalidUnit = value;
+      _placementKey++;
+      _status = value ? 'Using invalid ad unit (no auto-retry expected)…' : 'Recreating banner with test unit…';
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -471,10 +413,51 @@ class BottomBannerAd extends StatelessWidget {
         color: Colors.white,
         border: Border(top: BorderSide(color: Color(0x18000000))),
       ),
-      child: const BannerAdView(
-        adUnitId: AdTestIds.banner,
-        size: AdSize.largeAnchored(),
-        height: 120,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(12, 8, 8, 0),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(_status, style: const TextStyle(fontSize: 11, color: Color(0xFF475467))),
+                ),
+                TextButton(
+                  onPressed: _controller.isAttached
+                      ? () {
+                          _log('Manual reload requested…');
+                          unawaited(_controller.reload());
+                        }
+                      : null,
+                  child: const Text('Reload'),
+                ),
+              ],
+            ),
+          ),
+          SwitchListTile(
+            contentPadding: const EdgeInsets.symmetric(horizontal: 12),
+            dense: true,
+            title: const Text('Use invalid ad unit', style: TextStyle(fontSize: 12)),
+            subtitle: const Text('Forces load failure. Invalid requests are not retried.', style: TextStyle(fontSize: 11)),
+            value: _useInvalidUnit,
+            onChanged: _toggleInvalidUnit,
+          ),
+          BannerAdView(
+            key: ValueKey('banner-demo-$_placementKey'),
+            controller: _controller,
+            adUnitId: _adUnitId,
+            size: const AdSize.largeAnchored(),
+            height: 120,
+            listener: BannerAdListener(
+              onAdLoaded: () => _log('Loaded'),
+              onAdFailedToLoad: (error) => _log(
+                'Failed (code ${error.code}): ${error.message} — '
+                'controller may auto-reload up to 2 times',
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -493,29 +476,17 @@ class SectionLabel extends StatelessWidget {
       children: [
         Text(
           label,
-          style: TextStyle(
-            fontSize: 11,
-            fontWeight: FontWeight.w700,
-            letterSpacing: 1.2,
-            color: color.withValues(alpha: 0.7),
-          ),
+          style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 1.2, color: color.withValues(alpha: 0.7)),
         ),
         const SizedBox(width: 8),
-        Expanded(
-          child: Divider(thickness: 1, color: color.withValues(alpha: 0.12)),
-        ),
+        Expanded(child: Divider(thickness: 1, color: color.withValues(alpha: 0.12))),
       ],
     );
   }
 }
 
 class NativeAdCard extends StatelessWidget {
-  const NativeAdCard({
-    super.key,
-    required this.label,
-    required this.icon,
-    required this.child,
-  });
+  const NativeAdCard({super.key, required this.label, required this.icon, required this.child});
 
   final String label;
   final IconData icon;
@@ -529,13 +500,7 @@ class NativeAdCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 12, offset: const Offset(0, 4))],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -548,12 +513,7 @@ class NativeAdCard extends StatelessWidget {
                 const SizedBox(width: 6),
                 Text(
                   label,
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 0.8,
-                    color: color.withValues(alpha: 0.6),
-                  ),
+                  style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 0.8, color: color.withValues(alpha: 0.6)),
                 ),
               ],
             ),
@@ -574,11 +534,7 @@ IconData statusIcon(String status) {
   if (s.contains('load') || s.contains('showing') || s.contains('loading')) {
     return Icons.hourglass_top_rounded;
   }
-  if (s.contains('reward') ||
-      s.contains('dismiss') ||
-      s.contains('loaded') ||
-      s.contains('ready') ||
-      s.contains('closed')) {
+  if (s.contains('reward') || s.contains('dismiss') || s.contains('loaded') || s.contains('ready') || s.contains('closed')) {
     return Icons.check_circle_outline_rounded;
   }
   return Icons.info_outline_rounded;
@@ -592,11 +548,7 @@ Color statusColor(BuildContext context, String status) {
   if (s.contains('load') || s.contains('showing') || s.contains('loading')) {
     return const Color(0xFFF57C00);
   }
-  if (s.contains('reward') ||
-      s.contains('dismiss') ||
-      s.contains('loaded') ||
-      s.contains('ready') ||
-      s.contains('closed')) {
+  if (s.contains('reward') || s.contains('dismiss') || s.contains('loaded') || s.contains('ready') || s.contains('closed')) {
     return const Color(0xFF2E7D32);
   }
   return Theme.of(context).colorScheme.primary;
@@ -610,19 +562,15 @@ Future<void> main() async {
   var startupStatus = 'Ready.';
 
   try {
-    await ConsentInformation.instance.requestConsentInfoUpdate(
-      const ConsentRequestParameters(),
-    );
+    await ConsentInformation.instance.requestConsentInfoUpdate(const ConsentRequestParameters());
 
     final formError = await ConsentForm.loadAndShowConsentFormIfRequired();
     if (formError != null) {
       startupStatus = 'Consent form dismissed with error: $formError';
     }
 
-    final privacyStatus = await ConsentInformation.instance
-        .getPrivacyOptionsRequirementStatus();
-    privacyOptionsRequired =
-        privacyStatus == PrivacyOptionsRequirementStatus.required;
+    final privacyStatus = await ConsentInformation.instance.getPrivacyOptionsRequirementStatus();
+    privacyOptionsRequired = privacyStatus == PrivacyOptionsRequirementStatus.required;
     adsReady = await ConsentInformation.instance.canRequestAds();
   } on ConsentFormException catch (e) {
     startupStatus = 'Consent update failed: ${e.error}';
@@ -631,33 +579,17 @@ Future<void> main() async {
 
   if (adsReady) {
     await MobileAds.initialize();
-    await MobileAds.setRequestConfiguration(
-      const RequestConfiguration(testDeviceIds: ['TESTING_DEVICE_HASH']),
-    );
-    await InterstitialAdPreloader.start(
-      adUnitId: AdTestIds.interstitial,
-      bufferSize: 2,
-    );
+    await MobileAds.setRequestConfiguration(const RequestConfiguration(testDeviceIds: ['TESTING_DEVICE_HASH']));
+    await InterstitialAdPreloader.start(adUnitId: AdTestIds.interstitial, bufferSize: 2);
   } else {
     startupStatus = 'Ads cannot be requested yet.';
   }
 
-  runApp(
-    FlutterNextGenAdsDemoApp(
-      adsReady: adsReady,
-      privacyOptionsRequired: privacyOptionsRequired,
-      startupStatus: startupStatus,
-    ),
-  );
+  runApp(FlutterNextGenAdsDemoApp(adsReady: adsReady, privacyOptionsRequired: privacyOptionsRequired, startupStatus: startupStatus));
 }
 
 class FlutterNextGenAdsDemoApp extends StatelessWidget {
-  const FlutterNextGenAdsDemoApp({
-    super.key,
-    required this.adsReady,
-    required this.privacyOptionsRequired,
-    required this.startupStatus,
-  });
+  const FlutterNextGenAdsDemoApp({super.key, required this.adsReady, required this.privacyOptionsRequired, required this.startupStatus});
 
   final bool adsReady;
   final bool privacyOptionsRequired;
@@ -669,22 +601,13 @@ class FlutterNextGenAdsDemoApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'admob_nextgen Demo',
       theme: buildDemoTheme(),
-      home: DemoHomePage(
-        adsReady: adsReady,
-        privacyOptionsRequired: privacyOptionsRequired,
-        startupStatus: startupStatus,
-      ),
+      home: DemoHomePage(adsReady: adsReady, privacyOptionsRequired: privacyOptionsRequired, startupStatus: startupStatus),
     );
   }
 }
 
 class DemoHomePage extends StatefulWidget {
-  const DemoHomePage({
-    super.key,
-    required this.adsReady,
-    required this.privacyOptionsRequired,
-    required this.startupStatus,
-  });
+  const DemoHomePage({super.key, required this.adsReady, required this.privacyOptionsRequired, required this.startupStatus});
 
   final bool adsReady;
   final bool privacyOptionsRequired;
@@ -711,9 +634,7 @@ class _DemoHomePageState extends State<DemoHomePage> {
     super.initState();
     _status = widget.startupStatus;
     unawaited(AppStateEventNotifier.startListening());
-    _appStateSubscription = AppStateEventNotifier.appStateStream.listen((
-      state,
-    ) {
+    _appStateSubscription = AppStateEventNotifier.appStateStream.listen((state) {
       if (state == AppState.foreground) {
         _maybeShowAppOpenAd();
       }
@@ -812,9 +733,7 @@ class _DemoHomePageState extends State<DemoHomePage> {
     });
 
     try {
-      InterstitialAd? ad = await InterstitialAdPreloader.poll(
-        adUnitId: AdTestIds.interstitial,
-      );
+      InterstitialAd? ad = await InterstitialAdPreloader.poll(adUnitId: AdTestIds.interstitial);
       ad ??= await InterstitialAd.load(adUnitId: AdTestIds.interstitial);
       ad.listener = InterstitialAdListener(
         onAdDismissedFullScreenContent: () {
@@ -873,9 +792,7 @@ class _DemoHomePageState extends State<DemoHomePage> {
     });
 
     try {
-      final ad = await RewardedInterstitialAd.load(
-        adUnitId: AdTestIds.rewardedInterstitial,
-      );
+      final ad = await RewardedInterstitialAd.load(adUnitId: AdTestIds.rewardedInterstitial);
       ad.listener = RewardedInterstitialAdListener(
         onAdDismissedFullScreenContent: () {
           _finishFullScreenAd(completionStatus);
@@ -886,8 +803,7 @@ class _DemoHomePageState extends State<DemoHomePage> {
       );
       await ad.show(
         onUserEarnedReward: (reward) {
-          completionStatus =
-              'Rewarded interstitial: ${reward.amount} ${reward.type}';
+          completionStatus = 'Rewarded interstitial: ${reward.amount} ${reward.type}';
           if (!mounted) return;
           setState(() => _status = completionStatus);
         },
@@ -978,9 +894,7 @@ class _DemoHomePageState extends State<DemoHomePage> {
     final error = await ConsentForm.showPrivacyOptionsForm();
     if (!mounted) return;
     setState(() {
-      _status = error == null
-          ? 'Privacy options closed.'
-          : 'Privacy options error: $error';
+      _status = error == null ? 'Privacy options closed.' : 'Privacy options error: $error';
     });
   }
 
@@ -999,10 +913,7 @@ class _DemoHomePageState extends State<DemoHomePage> {
                   children: [
                     StatusCard(status: _status),
                     const SizedBox(height: 24),
-                    if (widget.privacyOptionsRequired) ...[
-                      PrivacySection(onShowPrivacyOptions: _showPrivacyOptions),
-                      const SizedBox(height: 24),
-                    ],
+                    if (widget.privacyOptionsRequired) ...[PrivacySection(onShowPrivacyOptions: _showPrivacyOptions), const SizedBox(height: 24)],
                     FullScreenAdsSection(
                       adsReady: widget.adsReady,
                       isShowingAd: _isFullScreenAdShowing,
