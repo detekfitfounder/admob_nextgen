@@ -14,6 +14,10 @@
 - Added [MobileAds.openAdInspector] to launch the GMA ad inspector overlay
   programmatically (test devices registered in the AdMob console are picked up
   automatically).
+- Fixed [MobileAds.openAdInspector] native call for GMA Next-Gen SDK 1.0.x
+  (`openAdInspector(listener)` — no Context argument).
+- Migrates Android Gradle setup toward Built-in Kotlin (apply KGP only when
+  AGP major version is below 9).
 
 ## 0.1.1
 

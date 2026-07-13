@@ -304,15 +304,6 @@ class AdmobNextgenPlugin : FlutterPlugin, ActivityAware, MethodChannel.MethodCal
             }
 
             "openAdInspector" -> {
-                val act = hostActivity
-                if (act == null) {
-                    result.error(
-                        "NO_ACTIVITY",
-                        "Activity is not available to open the ad inspector.",
-                        null,
-                    )
-                    return
-                }
                 if (!isInitialized) {
                     result.error(
                         "NOT_INITIALIZED",
@@ -321,9 +312,14 @@ class AdmobNextgenPlugin : FlutterPlugin, ActivityAware, MethodChannel.MethodCal
                     )
                     return
                 }
-                MobileAds.openAdInspector(act) { error ->
+                // Next-Gen SDK 1.0.x: openAdInspector(OnAdInspectorClosedListener) only — no Context.
+                MobileAds.openAdInspector { error ->
                     if (error != null) {
-                        result.success(mapOf("error" to error.toFlutterMap()))
+                        result.success(
+                            mapOf(
+                                "error" to error.toFlutterMap(),
+                            ),
+                        )
                     } else {
                         result.success(null)
                     }

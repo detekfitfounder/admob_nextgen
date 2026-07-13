@@ -2,7 +2,6 @@ group = "io.aban.admob_nextgen"
 version = "1.0-SNAPSHOT"
 
 buildscript {
-    val kotlinVersion = "2.3.20"
     repositories {
         google()
         mavenCentral()
@@ -10,7 +9,6 @@ buildscript {
 
     dependencies {
         classpath("com.android.tools.build:gradle:9.0.1")
-        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion")
     }
 }
 
@@ -23,6 +21,16 @@ allprojects {
 
 plugins {
     id("com.android.library")
+}
+
+// AGP 9+ uses Built-in Kotlin; only apply the Kotlin Gradle Plugin on older AGP.
+val agpMajor =
+    com.android.Version.ANDROID_GRADLE_PLUGIN_VERSION
+        .substringBefore('.')
+        .toInt()
+
+if (agpMajor < 9) {
+    apply(plugin = "org.jetbrains.kotlin.android")
 }
 
 android {
@@ -50,7 +58,7 @@ android {
 
 }
 
-kotlin {
+project.extensions.configure(org.jetbrains.kotlin.gradle.dsl.KotlinAndroidProjectExtension::class.java) {
     compilerOptions {
         jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
     }
