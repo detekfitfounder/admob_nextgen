@@ -134,7 +134,7 @@ Future<void> main() async {
 }
 ```
 
-Optionally configure test devices:
+Optionally configure test devices in code:
 
 ```dart
 await MobileAds.setRequestConfiguration(
@@ -143,6 +143,27 @@ await MobileAds.setRequestConfiguration(
   ),
 );
 ```
+
+You can also register test devices in the [AdMob console](https://admob.google.com)
+(Settings → Test devices). Devices registered there are recognized by the SDK
+without passing IDs in Dart — including for [MobileAds.openAdInspector].
+
+### Ad Inspector
+
+Open the in-app ad inspector to debug ad requests, adapter status, and privacy
+settings. Register your device as a test device in AdMob first, then call:
+
+```dart
+try {
+  await MobileAds.openAdInspector();
+} on AdInspectorException catch (error) {
+  print('Ad inspector failed: ${error.error}');
+}
+```
+
+Shake-to-open still works if you configure an Ad Inspector gesture for the test
+device in AdMob. [MobileAds.openAdInspector] is an alternative when gestures
+are unreliable.
 
 ## Banner Ad
 

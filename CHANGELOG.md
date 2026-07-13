@@ -11,6 +11,9 @@
 - Refactored `AdSize.mediumRectangle()` to the standard 300×250 MREC only;
   custom dimensions now use `AdSize.fixed()`.
 - Added unit tests for IAB banner size dimensions.
+- Added [MobileAds.openAdInspector] to launch the GMA ad inspector overlay
+  programmatically (test devices registered in the AdMob console are picked up
+  automatically).
 
 ## 0.1.1
 

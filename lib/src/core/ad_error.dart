@@ -27,3 +27,13 @@ class AdLoadException implements Exception {
   @override
   String toString() => 'AdLoadException: $error';
 }
+
+/// Thrown by [MobileAds.openAdInspector] when the ad inspector closes due to
+/// an error.
+class AdInspectorException implements Exception {
+  const AdInspectorException(this.error);
+  final AdError error;
+
+  @override
+  String toString() => 'AdInspectorException: $error';
+}

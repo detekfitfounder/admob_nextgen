@@ -10,6 +10,7 @@ import io.aban.admob_nextgen.app_state.AppStateNotifier
 import io.aban.admob_nextgen.banner.BannerAdViewFactory
 import io.aban.admob_nextgen.consent.ConsentManager
 import io.aban.admob_nextgen.core.applyRequestConfiguration
+import io.aban.admob_nextgen.core.toFlutterMap
 import io.aban.admob_nextgen.helper.FullScreenAdCoordinator
 import io.aban.admob_nextgen.interstitial.InterstitialAdManager
 import io.aban.admob_nextgen.native_ads.NativeAdManager
@@ -299,6 +300,33 @@ class AdmobNextgenPlugin : FlutterPlugin, ActivityAware, MethodChannel.MethodCal
                     result.success(null)
                 } catch (t: Throwable) {
                     result.error("CONFIG_FAILED", t.message, null)
+                }
+            }
+
+            "openAdInspector" -> {
+                val act = hostActivity
+                if (act == null) {
+                    result.error(
+                        "NO_ACTIVITY",
+                        "Activity is not available to open the ad inspector.",
+                        null,
+                    )
+                    return
+                }
+                if (!isInitialized) {
+                    result.error(
+                        "NOT_INITIALIZED",
+                        "Call MobileAds.initialize() before openAdInspector.",
+                        null,
+                    )
+                    return
+                }
+                MobileAds.openAdInspector(act) { error ->
+                    if (error != null) {
+                        result.success(mapOf("error" to error.toFlutterMap()))
+                    } else {
+                        result.success(null)
+                    }
                 }
             }
 

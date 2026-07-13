@@ -1,3 +1,4 @@
+import 'ad_error.dart';
 import 'channel.dart';
 import 'request_configuration.dart';
 
@@ -53,4 +54,27 @@ class MobileAds {
   /// flag the account.
   static Future<void> setRequestConfiguration(RequestConfiguration config) =>
       applyRequestConfiguration(config);
+
+  /// Opens the GMA ad inspector overlay for debugging ad requests.
+  ///
+  /// Register your device as a **test device** in the [AdMob console](https://admob.google.com)
+  /// before calling this. Test devices and ad inspector gestures configured
+  /// there are picked up automatically — you do not need to pass a device ID
+  /// to this method.
+  ///
+  /// Completes when the user dismisses the inspector. Throws
+  /// [AdInspectorException] if the inspector closes due to an error (for
+  /// example, the device is not in test mode).
+  ///
+  /// Call [initialize] first. Android only.
+  static Future<void> openAdInspector() async {
+    final raw = await AdsChannel.instance.channel
+        .invokeMethod<dynamic>('openAdInspector');
+    if (raw is Map) {
+      final error = raw['error'];
+      if (error is Map) {
+        throw AdInspectorException(AdError.fromMap(error));
+      }
+    }
+  }
 }

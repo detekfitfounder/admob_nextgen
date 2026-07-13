@@ -4,7 +4,8 @@
 ///
 /// Provides idiomatic Dart access to:
 ///
-/// * [MobileAds] — SDK initialization, version, [RequestConfiguration]
+/// * [MobileAds] — SDK initialization, version, [RequestConfiguration],
+///   [MobileAds.openAdInspector]
 /// * [BannerAdView], [BannerAdController] — inline banner ads with reload support
 /// * [InterstitialAd] — full-screen interstitial ads
 /// * [RewardedAd], [RewardedInterstitialAd] — rewarded full-screen ads
