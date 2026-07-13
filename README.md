@@ -163,10 +163,15 @@ Available sizes:
 ### Banner reload and automatic retry
 
 Attach a `BannerAdController` to reload a banner without recreating the widget.
-When a load fails, the controller can automatically retry using the optional
-retry fields on the controller.
+Automatic retry on failure is **opt-in** — enable it with `retryOnNoFill` and/or
+`retryOnNetworkError`. Without a controller, failed banners collapse to
+`placeholder` as before.
 
 ```dart
+// Manual reload only — no automatic retry on failure:
+final adController = BannerAdController();
+
+// Opt in to automatic retry:
 final adController = BannerAdController(
   maxAttempts: 2,
   delay: Duration.zero,
@@ -201,15 +206,17 @@ adController.dispose();
 | --- | --- | --- |
 | `maxAttempts` | `2` | Reload tries after a failure, not counting the initial load |
 | `delay` | `Duration.zero` | Wait before each automatic reload; manual `reload()` is not delayed |
-| `retryOnNoFill` | `true` | Retries GMA error code `3` |
-| `retryOnNetworkError` | `true` | Retries GMA error code `2` |
+| `retryOnNoFill` | `false` | Set `true` to auto-retry GMA error code `3` |
+| `retryOnNetworkError` | `false` | Set `true` to auto-retry GMA error code `2` |
 
 Invalid requests (code `1`) and internal SDK errors (code `0`) are never
 retried. Pass the same optional fields to `reload()` to override them for one
 load cycle.
 
 Without a controller, `BannerAdView` keeps the previous behavior: on load
-failure it collapses to `placeholder` (or `SizedBox.shrink()`).
+failure it collapses to `placeholder` (or `SizedBox.shrink()`). With a
+controller but no retry flags enabled, the banner stays mounted so you can call
+`reload()` manually from `onAdFailedToLoad`.
 
 ## Interstitial Ad
 

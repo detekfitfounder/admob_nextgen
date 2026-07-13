@@ -22,8 +22,8 @@ abstract final class BannerAdErrorCode {
 @visibleForTesting
 bool isBannerErrorRetryable(
   AdError error, {
-  bool retryOnNoFill = true,
-  bool retryOnNetworkError = true,
+  bool retryOnNoFill = false,
+  bool retryOnNetworkError = false,
 }) {
   switch (error.code) {
     case BannerAdErrorCode.networkError:
@@ -44,10 +44,14 @@ bool isBannerErrorRetryable(
 /// Create one controller per banner placement, pass it to [BannerAdView], and
 /// call [dispose] when the placement is removed.
 ///
+/// Automatic retry on load failure is **opt-in**. Pass [retryOnNoFill] and/or
+/// [retryOnNetworkError] to enable it. With neither flag set, the controller
+/// only supports manual [reload] calls.
+///
 /// ```dart
 /// final adController = BannerAdController(
-///   maxAttempts: 2,
 ///   retryOnNetworkError: true,
+///   maxAttempts: 2,
 /// );
 ///
 /// BannerAdView(
@@ -65,8 +69,8 @@ class BannerAdController {
   BannerAdController({
     this.maxAttempts = 2,
     this.delay = Duration.zero,
-    this.retryOnNoFill = true,
-    this.retryOnNetworkError = true,
+    this.retryOnNoFill = false,
+    this.retryOnNetworkError = false,
   });
 
   /// Maximum reload attempts after a load failure before giving up.
@@ -176,13 +180,17 @@ class BannerAdController {
     if (_disposed) return;
 
     final settings = _settings;
+    final autoRetryEnabled =
+        settings.retryOnNoFill || settings.retryOnNetworkError;
 
     if (!isBannerErrorRetryable(
       error,
       retryOnNoFill: settings.retryOnNoFill,
       retryOnNetworkError: settings.retryOnNetworkError,
     )) {
-      _markFailed?.call();
+      if (autoRetryEnabled) {
+        _markFailed?.call();
+      }
       return;
     }
 

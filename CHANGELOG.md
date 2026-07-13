@@ -3,10 +3,11 @@
 - Added `BannerAdController` with native `reload()` support for `BannerAdView`.
 - Optional retry tuning on `BannerAdController`: `maxAttempts`, `delay`,
   `retryOnNoFill`, and `retryOnNetworkError` (no wrapper object required).
-- Automatic banner reload retries no-fill and network errors only; invalid
-  requests and internal SDK errors are never retried.
-- Default retry policy is conservative for AdMob: up to 2 reload attempts, no
-  delay, retry on no-fill and network errors enabled.
+- Automatic banner reload retries no-fill and network errors only when the
+  controller sets `retryOnNoFill` and/or `retryOnNetworkError` to `true`.
+- Default controller settings do not auto-retry; invalid requests and internal
+  SDK errors are never retried.
+- Default retry limits when enabled: up to 2 reload attempts, no delay.
 - Updated the example app bottom banner with reload controls and failure
   simulation for manual testing.
 - Added unit tests for banner reload retry decisions.

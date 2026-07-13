@@ -385,6 +385,8 @@ class _BottomBannerAdState extends State<BottomBannerAd> {
     _controller = BannerAdController(
       maxAttempts: 2,
       delay: const Duration(seconds: 2),
+      retryOnNoFill: true,
+      retryOnNetworkError: true,
     );
   }
 
