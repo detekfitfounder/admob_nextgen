@@ -159,6 +159,27 @@ Available sizes:
 - `AdSize.anchored()`
 - `AdSize.largeAnchored()`
 - `AdSize.inline()`
+- `AdSize.mediumRectangle()` — fixed IAB medium rectangle, 300x250 dp by default
+  (custom `width` / `height` supported)
+
+For `AdSize.mediumRectangle()`, give the widget a container at least as large as
+the chosen height:
+
+```dart
+// Standard IAB medium rectangle (300x250):
+BannerAdView(
+  adUnitId: 'ca-app-pub-3940256099942544/9214589741',
+  size: const AdSize.mediumRectangle(),
+  height: 250,
+)
+
+// Custom fixed size:
+BannerAdView(
+  adUnitId: 'ca-app-pub-3940256099942544/9214589741',
+  size: const AdSize.mediumRectangle(width: 320, height: 200),
+  height: 200,
+)
+```
 
 ### Banner reload and automatic retry
 

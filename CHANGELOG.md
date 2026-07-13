@@ -1,5 +1,7 @@
 ## 0.1.1
 
+- Added `AdSize.mediumRectangle()` with optional `width` and `height` for fixed
+  banner sizes (defaults to the IAB standard 300x250 dp).
 - Added `BannerAdController` with native `reload()` support for `BannerAdView`.
 - Optional retry tuning on `BannerAdController`: `maxAttempts`, `delay`,
   `retryOnNoFill`, and `retryOnNetworkError` (no wrapper object required).
