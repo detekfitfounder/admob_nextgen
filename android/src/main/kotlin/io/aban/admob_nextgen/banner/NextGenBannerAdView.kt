@@ -51,6 +51,7 @@ class NextGenBannerAdView(
         val maxHeightDp = (creationParams["maxHeightDp"] as? Number)?.toInt() ?: 0
         @Suppress("UNCHECKED_CAST")
         val requestParams = creationParams["request"] as? Map<String, Any?>
+        val collapsible = creationParams["collapsible"] as? String
 
         eventChannel.setMethodCallHandler { call, result ->
             when (call.method) {
@@ -97,10 +98,27 @@ class NextGenBannerAdView(
                             "before creating a BannerAdView.",
                     )
                 }
-                storeLoadParams(adUnitId, widthDp, sizeType, maxHeightDp, requestParams)
+                storeLoadParams(
+                    adUnitId,
+                    widthDp,
+                    sizeType,
+                    maxHeightDp,
+                    mergeCollapsibleIntoRequest(requestParams, collapsible),
+                )
                 loadAd(activity)
             }
         }
+    }
+
+    private fun mergeCollapsibleIntoRequest(
+        requestParams: Map<String, Any?>?,
+        collapsible: String?,
+    ): Map<String, Any?>? {
+        if (collapsible.isNullOrBlank()) return requestParams
+        val merged = LinkedHashMap<String, Any?>()
+        if (requestParams != null) merged.putAll(requestParams)
+        merged["collapsible"] = collapsible
+        return merged
     }
 
     private fun storeLoadParams(
@@ -155,8 +173,12 @@ class NextGenBannerAdView(
             object : AdLoadCallback<BannerAd> {
                 override fun onAdLoaded(ad: BannerAd) {
                     isLoading = false
-                    Log.d(TAG, "Banner ad loaded.")
-                    invokeOnMain("onAdLoaded", null)
+                    val collapsible = ad.isCollapsible()
+                    Log.d(TAG, "Banner ad loaded (isCollapsible=$collapsible).")
+                    invokeOnMain(
+                        "onAdLoaded",
+                        mapOf("isCollapsible" to collapsible),
+                    )
                     ad.adEventCallback = object : BannerAdEventCallback {
                         override fun onAdImpression() {
                             invokeOnMain("onAdImpression", null)
@@ -219,6 +241,9 @@ class NextGenBannerAdView(
     ): AdSize {
         return when (sizeType) {
             "largeAnchored" -> AdSize.getLargeAnchoredAdaptiveBannerAdSize(activity, widthDp)
+            // Collapsible maps to anchored adaptive; extras carry top/bottom.
+            "collapsible", "anchored" ->
+                AdSize.getCurrentOrientationAnchoredAdaptiveBannerAdSize(activity, widthDp)
             "inline" -> AdSize.getInlineAdaptiveBannerAdSize(widthDp, maxHeightDp)
             "banner" -> AdSize.BANNER
             "largeBanner" -> AdSize.LARGE_BANNER

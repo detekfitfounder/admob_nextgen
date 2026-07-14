@@ -1,5 +1,6 @@
 package io.aban.admob_nextgen.core
 
+import android.os.Bundle
 import com.google.android.libraries.ads.mobile.sdk.common.AdRequest
 import com.google.android.libraries.ads.mobile.sdk.common.BaseRequestBuilder
 import com.google.android.libraries.ads.mobile.sdk.banner.BannerAdRequest
@@ -37,6 +38,16 @@ internal fun <T : BaseRequestBuilder<T>> Map<String, Any?>?.applyTargetingTo(
     (params["placementId"] as? Number)?.let { builder.setPlacementId(it.toLong()) }
 }
 
+/** Applies banner-only Google extras (e.g. collapsible placement). */
+internal fun BannerAdRequest.Builder.applyBannerExtras(params: Map<String, Any?>?) {
+    val placement = params?.get("collapsible") as? String ?: return
+    if (placement != "top" && placement != "bottom") return
+    val extras = Bundle().apply {
+        putString("collapsible", placement)
+    }
+    setGoogleExtrasBundle(extras)
+}
+
 /** Builds a standard ad request with optional targeting. */
 internal fun buildAdRequest(adUnitId: String, params: Map<String, Any?>?): AdRequest {
     val builder = AdRequest.Builder(adUnitId)
@@ -44,7 +55,7 @@ internal fun buildAdRequest(adUnitId: String, params: Map<String, Any?>?): AdReq
     return builder.build()
 }
 
-/** Builds a banner request with optional targeting. */
+/** Builds a banner request with optional targeting and collapsible extras. */
 internal fun buildBannerAdRequest(
     adUnitId: String,
     size: AdSize,
@@ -52,6 +63,7 @@ internal fun buildBannerAdRequest(
 ): BannerAdRequest {
     val builder = BannerAdRequest.Builder(adUnitId, size)
     params.applyTargetingTo(builder)
+    builder.applyBannerExtras(params)
     return builder.build()
 }
 

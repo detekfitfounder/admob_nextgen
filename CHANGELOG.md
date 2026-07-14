@@ -1,3 +1,15 @@
+## 0.1.3
+
+- Added collapsible banners via `AdSize.collapsible(placement:)` with required
+  `CollapsiblePlacement.top` / `.bottom` (anchored adaptive + Google extras).
+- Added `AdSize.collapsibleRecommendedMinHeightDp` (`100`) — lower Flutter slots
+  (e.g. `60`) can clip the collapsed adaptive bar.
+- Added `BannerAdListener.onIsCollapsible` to report whether the loaded creative
+  is collapsible (requests are not a guarantee).
+- Native banner requests pass the collapsible Google extras bundle; the flag is
+  preserved across `BannerAdController.reload()`.
+- Updated README use cases, example demo, and unit tests for collapsible banners.
+
 ## 0.1.2
 
 - Added fixed IAB banner sizes: `AdSize.banner()`, `AdSize.largeBanner()`,

@@ -377,6 +377,7 @@ class _BottomBannerAdState extends State<BottomBannerAd> {
   late final BannerAdController _controller;
   var _status = 'Waiting for banner…';
   var _useInvalidUnit = false;
+  var _collapsible = true;
   var _placementKey = 0;
 
   @override
@@ -408,6 +409,16 @@ class _BottomBannerAdState extends State<BottomBannerAd> {
       _useInvalidUnit = value;
       _placementKey++;
       _status = value ? 'Using invalid ad unit (no auto-retry expected)…' : 'Recreating banner with test unit…';
+    });
+  }
+
+  void _toggleCollapsible(bool value) {
+    setState(() {
+      _collapsible = value;
+      _placementKey++;
+      _status = value
+          ? 'Requesting collapsible (bottom)…'
+          : 'Recreating without collapsible…';
     });
   }
 
@@ -443,6 +454,17 @@ class _BottomBannerAdState extends State<BottomBannerAd> {
           SwitchListTile(
             contentPadding: const EdgeInsets.symmetric(horizontal: 12),
             dense: true,
+            title: const Text('Collapsible banner', style: TextStyle(fontSize: 12)),
+            subtitle: const Text(
+              'Requests bottom placement. Creative may still be non-collapsible.',
+              style: TextStyle(fontSize: 11),
+            ),
+            value: _collapsible,
+            onChanged: _toggleCollapsible,
+          ),
+          SwitchListTile(
+            contentPadding: const EdgeInsets.symmetric(horizontal: 12),
+            dense: true,
             title: const Text('Use invalid ad unit', style: TextStyle(fontSize: 12)),
             subtitle: const Text('Forces load failure. Invalid requests are not retried.', style: TextStyle(fontSize: 11)),
             value: _useInvalidUnit,
@@ -452,10 +474,21 @@ class _BottomBannerAdState extends State<BottomBannerAd> {
             key: ValueKey('banner-demo-$_placementKey'),
             controller: _controller,
             adUnitId: _adUnitId,
-            size: const AdSize.largeAnchored(),
-            height: 120,
+            size: _collapsible
+                ? const AdSize.collapsible(
+                    placement: CollapsiblePlacement.bottom,
+                  )
+                : const AdSize.largeAnchored(),
+            height: _collapsible
+                ? AdSize.collapsibleRecommendedMinHeightDp
+                : 120,
             listener: BannerAdListener(
               onAdLoaded: () => _log('Loaded'),
+              onIsCollapsible: (isCollapsible) => _log(
+                isCollapsible
+                    ? 'Loaded (collapsible creative)'
+                    : 'Loaded (non-collapsible creative)',
+              ),
               onAdFailedToLoad: (error) => _log(
                 'Failed (code ${error.code}): ${error.message} — '
                 'controller may auto-reload up to 2 times',

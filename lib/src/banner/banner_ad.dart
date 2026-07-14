@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 import '../core/ad_error.dart';
 import '../core/ad_request.dart';
 import 'ad_size.dart';
+import 'collapsible_placement.dart';
 
 part 'banner_controller.dart';
 
@@ -15,6 +16,7 @@ part 'banner_controller.dart';
 class BannerAdListener {
   const BannerAdListener({
     this.onAdLoaded,
+    this.onIsCollapsible,
     this.onAdFailedToLoad,
     this.onAdImpression,
     this.onAdClicked,
@@ -26,6 +28,13 @@ class BannerAdListener {
   });
 
   final VoidCallback? onAdLoaded;
+
+  /// Whether the loaded creative is a collapsible banner.
+  ///
+  /// Fires after [onAdLoaded]. Collapsible requests may still receive a
+  /// normal banner; use this to record what the SDK actually returned.
+  final void Function(bool isCollapsible)? onIsCollapsible;
+
   final void Function(AdError error)? onAdFailedToLoad;
   final VoidCallback? onAdImpression;
   final VoidCallback? onAdClicked;
@@ -38,6 +47,10 @@ class BannerAdListener {
   /// Auto-refresh is controlled via the **AdMob console** for the ad unit
   /// (not from this plugin). When enabled, the SDK swaps in a new ad while
   /// the banner is visible and invokes this callback for each refresh.
+  ///
+  /// After a collapsible load, AdMob auto-refresh serves non-collapsible ads
+  /// for subsequent refreshes. Call [BannerAdController.reload] to request
+  /// collapsible again.
   final VoidCallback? onAdRefreshed;
 
   /// Fires when an auto-refresh attempt fails (e.g. no fill).
@@ -51,10 +64,9 @@ class BannerAdListener {
 /// Wrap it in a `SizedBox`, place it inside a `Column` with a `SizedBox`
 /// sibling, or pass an explicit [height] — otherwise the ad will silently
 /// fail to render. Suggested heights: 50–100 dp for [AdSize.anchored],
-/// 100–130 dp for [AdSize.largeAnchored]. For fixed IAB sizes use
-/// [AdSize.suggestedHeightDp] on [AdSize.banner], [AdSize.largeBanner],
-/// [AdSize.mediumRectangle], [AdSize.fullBanner], [AdSize.leaderboard], or
-/// [AdSize.fixed].
+/// 100–130 dp for [AdSize.largeAnchored], at least
+/// [AdSize.collapsibleRecommendedMinHeightDp] (100) for [AdSize.collapsible].
+/// For fixed IAB sizes use [AdSize.suggestedHeightDp].
 ///
 /// **Initialization.** `MobileAds.initialize()` must complete before this
 /// widget mounts.
@@ -63,15 +75,12 @@ class BannerAdListener {
 /// [SizedBox.shrink] (or the supplied [placeholder]).
 ///
 /// ```dart
-/// final bannerController = BannerAdController();
-///
-/// SizedBox(
-///   height: 120,
-///   child: BannerAdView(
-///     controller: bannerController,
-///     adUnitId: 'ca-app-pub-…/…',
-///     size: AdSize.largeAnchored(),
+/// BannerAdView(
+///   adUnitId: 'ca-app-pub-…/…',
+///   size: const AdSize.collapsible(
+///     placement: CollapsiblePlacement.bottom,
 ///   ),
+///   height: AdSize.collapsibleRecommendedMinHeightDp,
 /// )
 /// ```
 class BannerAdView extends StatefulWidget {
@@ -91,6 +100,9 @@ class BannerAdView extends StatefulWidget {
   final String adUnitId;
 
   /// Logical size hint passed to the native banner.
+  ///
+  /// Use [AdSize.collapsible] to request a collapsible overlay on an anchored
+  /// adaptive slot.
   final AdSize size;
 
   /// Optional controller for [reload] and automatic retry on load failure.
@@ -112,6 +124,11 @@ class BannerAdView extends StatefulWidget {
   /// Convenience shortcut for the common case of "wrap me in a SizedBox of
   /// this height". If omitted, [BannerAdView] uses whatever size its parent
   /// supplies via [Container] / [SizedBox] / [Expanded] etc.
+  ///
+  /// For [AdSize.collapsible], keep this at the **collapsed** size — at least
+  /// [AdSize.collapsibleRecommendedMinHeightDp]. Expansion is an SDK overlay
+  /// and does not resize the Flutter layout. Values like `60` often clip the
+  /// adaptive collapsed bar.
   final double? height;
 
   /// Optional targeting hints for this banner request.
@@ -161,7 +178,9 @@ class _BannerAdViewState extends State<BannerAdView> {
     final sizeChanged =
         oldWidget.size.widthDp != widget.size.widthDp ||
         oldWidget.size.type != widget.size.type ||
-        oldWidget.size.maxHeightDp != widget.size.maxHeightDp;
+        oldWidget.size.maxHeightDp != widget.size.maxHeightDp ||
+        oldWidget.size.collapsiblePlacement !=
+            widget.size.collapsiblePlacement;
     final requestChanged = !mapEquals(
       oldWidget.request?.toMap(),
       widget.request?.toMap(),
@@ -182,6 +201,10 @@ class _BannerAdViewState extends State<BannerAdView> {
       case 'onAdLoaded':
         widget.controller?._onAdLoaded();
         widget.listener?.onAdLoaded?.call();
+        final isCollapsible = map['isCollapsible'];
+        if (isCollapsible is bool) {
+          widget.listener?.onIsCollapsible?.call(isCollapsible);
+        }
         break;
       case 'onAdFailedToLoad':
         final error = AdError.fromMap(map);
@@ -251,6 +274,8 @@ class _BannerAdViewState extends State<BannerAdView> {
       if (widget.size.maxHeightDp != null)
         'maxHeightDp': widget.size.maxHeightDp,
       if (widget.request != null) 'request': widget.request!.toMap(),
+      if (widget.size.collapsiblePlacement != null)
+        'collapsible': widget.size.collapsiblePlacement!.wireValue,
     };
 
     final adView = AndroidView(

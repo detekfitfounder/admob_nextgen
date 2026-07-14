@@ -40,6 +40,7 @@ targeting, and customizable native ad templates.
 - Google Mobile Ads Next-Gen SDK initialization.
 - UMP consent helpers.
 - Banner ads with anchored, large anchored, inline adaptive, and IAB fixed sizes.
+- Collapsible banners via `AdSize.collapsible(placement:)` (top/bottom).
 - Banner reload via `BannerAdController` with optional automatic retry on failure.
 - Interstitial, rewarded, rewarded interstitial, and app open ads.
 - Interstitial and rewarded interstitial preloaders.
@@ -51,7 +52,7 @@ targeting, and customizable native ad templates.
 
 ```yaml
 dependencies:
-  admob_nextgen: ^0.1.2
+  admob_nextgen: ^0.1.3
 ```
 
 Then run:
@@ -182,6 +183,7 @@ Available sizes:
 - `AdSize.anchored()` — bottom/top bar; SDK picks height
 - `AdSize.largeAnchored()` — taller bottom/top bar
 - `AdSize.inline()` — inside scrollable content
+- `AdSize.collapsible(placement: …)` — anchored adaptive + collapsible request
 
 **Fixed IAB standard sizes:**
 
@@ -223,6 +225,49 @@ BannerAdView(
 Google recommends **adaptive** banners (`anchored`, `largeAnchored`, `inline`)
 over fixed sizes on phones for better fill rates. Use fixed IAB sizes when your
 layout requires an exact slot (e.g. a 300×250 card in a feed).
+
+### Collapsible banner
+
+Use [AdSize.collapsible] with a required [CollapsiblePlacement]. Under the hood
+this is **anchored adaptive** plus Google extras (`top` / `bottom`). AdMob picks
+the collapsed creative height; the Flutter [BannerAdView.height] only reserves
+the collapsed PlatformView slot.
+
+**Recommended minimum height:** [AdSize.collapsibleRecommendedMinHeightDp]
+(`100`). Lower values such as `60` often **clip** the adaptive collapsed bar.
+Expanded overlay size is controlled by the SDK, not Flutter.
+
+```dart
+BannerAdView(
+  adUnitId: 'ca-app-pub-3940256099942544/9214589741',
+  size: const AdSize.collapsible(
+    placement: CollapsiblePlacement.bottom, // or .top
+  ),
+  height: AdSize.collapsibleRecommendedMinHeightDp, // 100 — do not use 60
+  listener: BannerAdListener(
+    onAdLoaded: () => print('Banner loaded'),
+    onIsCollapsible: (isCollapsible) {
+      // Requesting collapsible does not guarantee a collapsible creative.
+      print('Collapsible creative: $isCollapsible');
+    },
+  ),
+)
+```
+
+**Use cases**
+
+| Placement | Example |
+| --- | --- |
+| Bottom sticky bar | `AdSize.collapsible(placement: CollapsiblePlacement.bottom)` |
+| Top under app bar | `AdSize.collapsible(placement: CollapsiblePlacement.top)` |
+| Reload after auto-refresh | Keep the same `AdSize.collapsible(…)` and call `controller.reload()` |
+
+Notes:
+
+- Google demand only; mediation may return a normal banner.
+- After AdMob auto-refresh, subsequent refreshes are non-collapsible. Call
+  [BannerAdController.reload] to request collapsible again.
+- Prefer static screens (Google guideline); avoid mid-gameplay overlays.
 
 ### Banner reload and automatic retry
 
