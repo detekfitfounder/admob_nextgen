@@ -41,7 +41,7 @@ targeting, and customizable native ad templates.
 - UMP consent helpers.
 - Banner ads with anchored, large anchored, inline adaptive, and IAB fixed sizes.
 - Collapsible banners via `AdRequest(extras: {'collapsible': 'bottom'})`.
-- Banner reload via `BannerAdController` with optional automatic retry on failure.
+- Manual banner reload via `BannerAdController`.
 - Interstitial, rewarded, rewarded interstitial, and app open ads.
 - Interstitial and rewarded interstitial preloaders.
 - Three prebuilt native ad templates.
@@ -265,24 +265,14 @@ Notes:
   [BannerAdController.reload] with the same extras to request collapsible again.
 - Prefer static screens (Google guideline); avoid mid-gameplay overlays.
 
-### Banner reload and automatic retry
+### Manual banner reload
 
 Attach a `BannerAdController` to reload a banner without recreating the widget.
-Automatic retry on failure is **opt-in** — enable it with `retryOnNoFill` and/or
-`retryOnNetworkError`. Without a controller, failed banners collapse to
-`placeholder` as before.
+The controller never retries automatically. Without a controller, failed banners
+collapse to `placeholder` as before.
 
 ```dart
-// Manual reload only — no automatic retry on failure:
 final adController = BannerAdController();
-
-// Opt in to automatic retry:
-final adController = BannerAdController(
-  maxAttempts: 2,
-  delay: Duration.zero,
-  retryOnNoFill: true,
-  retryOnNetworkError: true,
-);
 
 BannerAdView(
   controller: adController,
@@ -298,30 +288,14 @@ BannerAdView(
 // Manual reload:
 await adController.reload();
 
-// Override retry fields for one reload cycle:
-await adController.reload(maxAttempts: 3, delay: Duration(seconds: 20));
-
 // Dispose when the placement is removed:
 adController.dispose();
 ```
 
-`BannerAdController` defaults:
-
-| Parameter | Default | Notes |
-| --- | --- | --- |
-| `maxAttempts` | `2` | Reload tries after a failure, not counting the initial load |
-| `delay` | `Duration.zero` | Wait before each automatic reload; manual `reload()` is not delayed |
-| `retryOnNoFill` | `false` | Set `true` to auto-retry GMA error code `3` |
-| `retryOnNetworkError` | `false` | Set `true` to auto-retry GMA error code `2` |
-
-Invalid requests (code `1`) and internal SDK errors (code `0`) are never
-retried. Pass the same optional fields to `reload()` to override them for one
-load cycle.
-
 Without a controller, `BannerAdView` keeps the previous behavior: on load
 failure it collapses to `placeholder` (or `SizedBox.shrink()`). With a
-controller but no retry flags enabled, the banner stays mounted so you can call
-`reload()` manually from `onAdFailedToLoad`.
+controller, the banner stays mounted so you can call `reload()` manually from
+`onAdFailedToLoad`.
 
 ## Interstitial Ad
 

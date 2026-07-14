@@ -1,3 +1,9 @@
+## Unreleased
+
+- Simplified `BannerAdController` to manual `reload()` only.
+- Removed automatic retry behavior and the `maxAttempts`, `delay`,
+  `retryOnNoFill`, and `retryOnNetworkError` options.
+
 ## 0.1.3
 
 - Added `AdRequest.extras` for network-specific parameters (official AdMob

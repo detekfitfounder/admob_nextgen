@@ -383,12 +383,7 @@ class _BottomBannerAdState extends State<BottomBannerAd> {
   @override
   void initState() {
     super.initState();
-    _controller = BannerAdController(
-      maxAttempts: 2,
-      delay: const Duration(seconds: 2),
-      retryOnNoFill: true,
-      retryOnNetworkError: true,
-    );
+    _controller = BannerAdController();
   }
 
   @override
@@ -408,7 +403,7 @@ class _BottomBannerAdState extends State<BottomBannerAd> {
     setState(() {
       _useInvalidUnit = value;
       _placementKey++;
-      _status = value ? 'Using invalid ad unit (no auto-retry expected)…' : 'Recreating banner with test unit…';
+      _status = value ? 'Using invalid ad unit…' : 'Recreating banner with test unit…';
     });
   }
 
@@ -466,7 +461,7 @@ class _BottomBannerAdState extends State<BottomBannerAd> {
             contentPadding: const EdgeInsets.symmetric(horizontal: 12),
             dense: true,
             title: const Text('Use invalid ad unit', style: TextStyle(fontSize: 12)),
-            subtitle: const Text('Forces load failure. Invalid requests are not retried.', style: TextStyle(fontSize: 11)),
+            subtitle: const Text('Forces a load failure for manual reload testing.', style: TextStyle(fontSize: 11)),
             value: _useInvalidUnit,
             onChanged: _toggleInvalidUnit,
           ),
@@ -486,10 +481,8 @@ class _BottomBannerAdState extends State<BottomBannerAd> {
                     ? 'Loaded (collapsible creative)'
                     : 'Loaded (non-collapsible creative)',
               ),
-              onAdFailedToLoad: (error) => _log(
-                'Failed (code ${error.code}): ${error.message} — '
-                'controller may auto-reload up to 2 times',
-              ),
+              onAdFailedToLoad: (error) =>
+                  _log('Failed (code ${error.code}): ${error.message}'),
             ),
           ),
         ],

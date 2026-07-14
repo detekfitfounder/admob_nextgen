@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:io' show Platform;
 
 import 'package:flutter/foundation.dart';
@@ -102,10 +101,10 @@ class BannerAdView extends StatefulWidget {
   /// Logical size hint passed to the native banner.
   final AdSize size;
 
-  /// Optional controller for [reload] and automatic retry on load failure.
+  /// Optional controller for manually reloading this banner.
   ///
-  /// When set, the banner stays mounted while retries are in progress instead
-  /// of collapsing to [placeholder] immediately.
+  /// When set, the banner stays mounted after a load failure so [reload] can
+  /// request another load. No automatic retries are performed.
   final BannerAdController? controller;
 
   /// Optional callbacks for ad lifecycle events.
@@ -206,9 +205,7 @@ class _BannerAdViewState extends State<BannerAdView> {
       case 'onAdFailedToLoad':
         final error = AdError.fromMap(map);
         widget.listener?.onAdFailedToLoad?.call(error);
-        if (widget.controller != null) {
-          widget.controller!._onAdFailedToLoad(error);
-        } else if (mounted) {
+        if (widget.controller == null && mounted) {
           setState(() => _adFailed = true);
         }
         break;
