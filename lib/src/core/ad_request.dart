@@ -5,13 +5,17 @@
 /// etc.). All fields are optional — pass `const AdRequest()` if you have no
 /// targeting hints.
 ///
+/// For collapsible banners (official AdMob pattern), pass extras:
+///
 /// ```dart
-/// const request = AdRequest(
-///   keywords: ['flutter', 'mobile-dev'],
-///   contentUrl: 'https://example.com/article',
-///   customTargeting: {'genre': ['action', 'adventure']},
+/// BannerAdView(
+///   adUnitId: '...',
+///   size: const AdSize.anchored(),
+///   height: 100,
+///   request: AdRequest(
+///     extras: {'collapsible': 'bottom'}, // or 'top'
+///   ),
 /// );
-/// final ad = await InterstitialAd.load(adUnitId: '...', request: request);
 /// ```
 class AdRequest {
   const AdRequest({
@@ -22,6 +26,7 @@ class AdRequest {
     this.requestAgent,
     this.categoryExclusions = const <String>[],
     this.publisherProvidedId,
+    this.extras = const <String, String>{},
   });
 
   /// Keywords describing the content the ad is shown alongside.
@@ -48,6 +53,12 @@ class AdRequest {
   /// targeting flows). Most apps can leave this null.
   final String? publisherProvidedId;
 
+  /// Extra parameters passed to the SDK (e.g. collapsible banner placement).
+  ///
+  /// Matches the official AdMob Flutter pattern:
+  /// `AdRequest(extras: {'collapsible': 'bottom'})`.
+  final Map<String, String> extras;
+
   /// Convert to the wire format consumed by the Kotlin plugin.
   Map<String, dynamic> toMap() => <String, dynamic>{
     if (keywords.isNotEmpty) 'keywords': keywords,
@@ -58,5 +69,6 @@ class AdRequest {
     if (requestAgent != null) 'requestAgent': requestAgent,
     if (categoryExclusions.isNotEmpty) 'categoryExclusions': categoryExclusions,
     if (publisherProvidedId != null) 'publisherProvidedId': publisherProvidedId,
+    if (extras.isNotEmpty) 'extras': extras,
   };
 }

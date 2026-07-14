@@ -6,8 +6,7 @@
 ///
 /// * [MobileAds] — SDK initialization, version, [RequestConfiguration],
 ///   [MobileAds.openAdInspector]
-/// * [BannerAdView], [BannerAdController], [CollapsiblePlacement] — banners with
-///   reload and optional collapsible overlay
+/// * [BannerAdView], [BannerAdController] — inline banner ads with reload support
 /// * [InterstitialAd] — full-screen interstitial ads
 /// * [RewardedAd], [RewardedInterstitialAd] — rewarded full-screen ads
 /// * [AppOpenAd] — full-screen ads with 4-hour expiry, for foreground transitions
@@ -15,12 +14,11 @@
 /// * [NativeAd], [NativeAdView] — standard native ad loading and rendering
 /// * [InterstitialAdPreloader], [RewardedInterstitialAdPreloader] — pool-based
 ///   preloading for instant ad display (Next-Gen SDK exclusive)
-/// * [AdRequest] — targeting hints (keywords, contentUrl, customTargeting)
+/// * [AdRequest] — targeting hints and extras (e.g. collapsible banners)
 library;
 
 export 'src/banner/ad_size.dart';
 export 'src/banner/banner_ad.dart';
-export 'src/banner/collapsible_placement.dart';
 export 'src/consent/consent.dart';
 export 'src/core/ad_error.dart';
 export 'src/core/ad_request.dart';

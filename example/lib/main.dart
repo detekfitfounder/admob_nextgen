@@ -474,14 +474,11 @@ class _BottomBannerAdState extends State<BottomBannerAd> {
             key: ValueKey('banner-demo-$_placementKey'),
             controller: _controller,
             adUnitId: _adUnitId,
-            size: _collapsible
-                ? const AdSize.collapsible(
-                    placement: CollapsiblePlacement.bottom,
-                  )
-                : const AdSize.largeAnchored(),
-            height: _collapsible
-                ? AdSize.collapsibleRecommendedMinHeightDp
-                : 120,
+            size: const AdSize.anchored(),
+            height: 100,
+            request: _collapsible
+                ? const AdRequest(extras: {'collapsible': 'bottom'})
+                : null,
             listener: BannerAdListener(
               onAdLoaded: () => _log('Loaded'),
               onIsCollapsible: (isCollapsible) => _log(

@@ -39,11 +39,5 @@ void main() {
       () => const AdSize.inline().suggestedHeightDp,
       throwsA(isA<StateError>()),
     );
-    expect(
-      () => const AdSize.collapsible(
-        placement: CollapsiblePlacement.bottom,
-      ).suggestedHeightDp,
-      throwsA(isA<StateError>()),
-    );
   });
 }

@@ -2,45 +2,40 @@ import 'package:admob_nextgen/admob_nextgen.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  test('CollapsiblePlacement wire values match Google extras', () {
-    expect(CollapsiblePlacement.top.wireValue, 'top');
-    expect(CollapsiblePlacement.bottom.wireValue, 'bottom');
-  });
-
-  test('AdSize.collapsible requires placement and maps to collapsible type', () {
-    const size = AdSize.collapsible(
-      placement: CollapsiblePlacement.bottom,
+  test('AdRequest.extras includes collapsible in toMap', () {
+    const request = AdRequest(
+      extras: {'collapsible': 'bottom'},
     );
 
-    expect(size.type, 'collapsible');
-    expect(size.collapsiblePlacement, CollapsiblePlacement.bottom);
-    expect(size.collapsiblePlacement!.wireValue, 'bottom');
-    expect(size.widthDp, 360);
-    expect(AdSize.collapsibleRecommendedMinHeightDp, 100);
+    expect(request.extras, {'collapsible': 'bottom'});
+    expect(request.toMap()['extras'], {'collapsible': 'bottom'});
   });
 
-  test('AdSize.collapsible supports custom width and top placement', () {
-    const size = AdSize.collapsible(
-      placement: CollapsiblePlacement.top,
-      width: 320,
+  test('AdRequest.extras supports top placement', () {
+    const request = AdRequest(
+      extras: {'collapsible': 'top'},
     );
 
-    expect(size.collapsiblePlacement, CollapsiblePlacement.top);
-    expect(size.widthDp, 320);
+    expect(request.toMap()['extras'], {'collapsible': 'top'});
   });
 
-  test('non-collapsible AdSize has null collapsiblePlacement', () {
-    expect(const AdSize.anchored().collapsiblePlacement, isNull);
-    expect(const AdSize.banner().collapsiblePlacement, isNull);
+  test('AdRequest omits extras from toMap when empty', () {
+    const request = AdRequest();
+
+    expect(request.extras, isEmpty);
+    expect(request.toMap().containsKey('extras'), isFalse);
   });
 
-  test('AdSize.collapsible throws for suggestedHeightDp', () {
-    expect(
-      () => const AdSize.collapsible(
-        placement: CollapsiblePlacement.bottom,
-      ).suggestedHeightDp,
-      throwsA(isA<StateError>()),
+  test('BannerAdView passes request extras for collapsible', () {
+    const view = BannerAdView(
+      adUnitId: 'ca-app-pub-test/banner',
+      size: AdSize.anchored(),
+      height: 100,
+      request: AdRequest(extras: {'collapsible': 'bottom'}),
     );
+
+    expect(view.request?.extras['collapsible'], 'bottom');
+    expect(view.size.type, 'anchored');
   });
 
   test('BannerAdListener accepts onIsCollapsible', () {

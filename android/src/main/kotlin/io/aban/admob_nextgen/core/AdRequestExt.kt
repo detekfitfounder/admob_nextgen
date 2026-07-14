@@ -38,14 +38,19 @@ internal fun <T : BaseRequestBuilder<T>> Map<String, Any?>?.applyTargetingTo(
     (params["placementId"] as? Number)?.let { builder.setPlacementId(it.toLong()) }
 }
 
-/** Applies banner-only Google extras (e.g. collapsible placement). */
-internal fun BannerAdRequest.Builder.applyBannerExtras(params: Map<String, Any?>?) {
-    val placement = params?.get("collapsible") as? String ?: return
-    if (placement != "top" && placement != "bottom") return
-    val extras = Bundle().apply {
-        putString("collapsible", placement)
+/** Applies Google extras from Dart [AdRequest.extras] (e.g. collapsible). */
+internal fun BannerAdRequest.Builder.applyGoogleExtras(params: Map<String, Any?>?) {
+    val extrasMap = params?.get("extras") as? Map<*, *> ?: return
+    if (extrasMap.isEmpty()) return
+    val extras = Bundle()
+    for ((key, value) in extrasMap) {
+        if (key is String && value is String) {
+            extras.putString(key, value)
+        }
     }
-    setGoogleExtrasBundle(extras)
+    if (!extras.isEmpty) {
+        setGoogleExtrasBundle(extras)
+    }
 }
 
 /** Builds a standard ad request with optional targeting. */
@@ -55,7 +60,7 @@ internal fun buildAdRequest(adUnitId: String, params: Map<String, Any?>?): AdReq
     return builder.build()
 }
 
-/** Builds a banner request with optional targeting and collapsible extras. */
+/** Builds a banner request with optional targeting and Google extras. */
 internal fun buildBannerAdRequest(
     adUnitId: String,
     size: AdSize,
@@ -63,7 +68,7 @@ internal fun buildBannerAdRequest(
 ): BannerAdRequest {
     val builder = BannerAdRequest.Builder(adUnitId, size)
     params.applyTargetingTo(builder)
-    builder.applyBannerExtras(params)
+    builder.applyGoogleExtras(params)
     return builder.build()
 }
 
